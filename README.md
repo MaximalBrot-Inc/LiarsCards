@@ -1,3 +1,3 @@
 # LiarsCards
 
-LiarsCards in Python using Urisna. 
+LiarsCards in Python using Ursina. 
