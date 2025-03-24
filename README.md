@@ -7,7 +7,7 @@
 > #### Brot
 > - Also does programming stuff. He's the second **GOAT**
 > #### Walnusskeim
-> - Making the 3D-Models. Or at least he tries to. He kinda sucks. He also made the incredibly beautiful logo for the game (wow).>
+> - Making the 3D-Models. Or at least he tries to. He kinda sucks. He also made the incredibly beautiful logo for the game (wow).
 
 <p align="center">
 <img src="https://i.ibb.co/vvqN0Dpp/Leserunde.png" />
