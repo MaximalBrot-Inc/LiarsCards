@@ -1,5 +1,5 @@
 # Leserunde
-## "Actually, it's calles Liar's Cards 🤓☝" WE DON'T CARE RAAAAAAH
+## "Actually, it's called Liar's Cards 🤓☝" WE DON'T CARE RAAAAAAH
 
 > ### Who is doing what?
 > #### MOD
