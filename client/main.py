@@ -14,7 +14,6 @@ from ui import UI
 debug = True
 class Main:
     def window(self):
-        
         self.app = ur.Ursina(icon="../ASSets/rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
         #self.ui = UI()
         
@@ -32,11 +31,10 @@ class Main:
         tabletop = ur.Entity(model='circle', color="#5C4033", position=(0, 1.1, 0), rotation=(90, 0, 0), scale=(4, 4, 4))
         #self.app.icon = "textures/Leserunde.ico"
 
-
-if __name__ == '__main__':
+    
     
 
-    main = Main()
-    main.window()
-    main.threed()
-    main.app.run()
+main = Main()
+main.window()
+main.threed()
+main.app.run()

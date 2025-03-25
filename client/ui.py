@@ -1,7 +1,6 @@
 from ursina import *
 import time
 from ursina.prefabs.first_person_controller import FirstPersonController
-import main 
 
 class UI:
     def __init__(self):
