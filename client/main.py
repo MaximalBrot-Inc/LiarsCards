@@ -31,7 +31,7 @@ class Main:
         '''
         create the window
         '''
-        self.app = ur.Ursina(icon="../client/ASSets/rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        self.app = ur.Ursina(icon="ASSets/rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
         #self.ui = UI()
         self.threed()
         
@@ -48,20 +48,19 @@ class Main:
         '''
         #self.ui.start()
         sky = ur.Sky()
-        model = ur.load_model('textures/turret')
+        #model = ur.load_model('textures/untitled')
 
         table = ur.Entity(
-            #model='turret',
-            model=model,
+            model="untitled",
             # model="cube",
-            position=(0, 1, 0),
-            scale=(10, 10, 10),
+            position=(0, 0, 0),
+            #scale=2,
             # texture="assets/Tesla-Cybertruck-Metro-Look.jpg",
             shader=lit_with_shadows_shader
         )
         #tabletop = ur.Entity(model='circle', color="#5C4033", position=(0, 1.1, 0), rotation=(90, 0, 0), scale=(4, 4, 4))
         player = Player(table, self.positions[5])
-        #floor = ur.Entity(model='plane', scale=(100, 1, 100), color=ur.color.white.tint(-0.2), texture='white_cube', texture_scale=(100, 100), collider='box')
+        floor = ur.Entity(model='plane', scale=(100, 1, 100), color=ur.color.white.tint(-0.2), texture='white_cube', texture_scale=(100, 100), collider='box')
         #enemy = Opponent(position=(3, 1, 0), scale=(1, 2, 1))
         #enemy2 = Opponent(position=(0, 1, 3), scale=(1, 2, 1))
         
