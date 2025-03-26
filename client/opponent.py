@@ -8,9 +8,7 @@ class Opponent(ur.Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.model = 'cube'
-        self.color = ur.color.red
-        
+        self.model = 'hatsune_miku.glb'
         self.direction = ur.Vec3(0, 0, 0)
         
 

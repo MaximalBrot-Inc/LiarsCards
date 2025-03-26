@@ -12,11 +12,14 @@ class Network(socket.socket):
         '''
         pass
 
-    def connect(self):
+    def connect(self, domain, port):
         '''
         connect to the server
         '''
-        pass
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((domain, port))
+        self.s.sendall(b'Hello world, hatsune miku')
+        
 
     def send(self, data):
         '''
@@ -28,10 +31,21 @@ class Network(socket.socket):
         '''
         receive data from the server
         '''
-        pass
+        uid = self.s.recv(2048).decode()
+        print(uid)
+        dic = self.s.recv(2048).decode()
+        safsafd = dic.split(";")
+        lst = []
+        for i in safsafd:
+            lst.append(i)
+        print(lst)
+        return uid, lst
 
     def disconnect(self):
         '''
         disconnect from the server
         '''
         pass
+    
+if __name__ == '__main__':
+    import main
