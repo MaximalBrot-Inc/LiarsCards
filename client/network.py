@@ -1,6 +1,6 @@
-'''
+"""
 networking of the clients
-'''
+"""
 import socket
 class Network(socket.socket):
     '''

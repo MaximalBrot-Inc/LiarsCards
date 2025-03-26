@@ -1,6 +1,6 @@
-'''
+"""
 creating and handling of gun
-'''
+"""
 import ursina as ur
 import time
 class Gun(ur.Entity):

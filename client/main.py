@@ -31,7 +31,7 @@ class Main:
         '''
         create the window
         '''
-        self.app = ur.Ursina(icon="ASSets/rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        self.app = ur.Ursina(icon="../ASSets/rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
         #self.ui = UI()
         self.threed()
         

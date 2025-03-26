@@ -1,6 +1,6 @@
-'''
+"""
 create a player class that will create the player
-'''
+"""
 import ursina as ur 
 from ursina.prefabs.first_person_controller import FirstPersonController
 from gun import Gun

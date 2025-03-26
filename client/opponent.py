@@ -1,6 +1,6 @@
-'''
+"""
 The enemy class will be used to create enemies that the player will play against.
-'''
+"""
 
 import ursina as ur 
 
