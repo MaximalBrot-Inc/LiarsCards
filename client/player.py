@@ -12,9 +12,9 @@ class Player(FirstPersonController):
         # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
         self.pos = pos
         #self.disable_movement()
-        
         self.gun = Gun(master, self.pos[2], self.pos[3], ur.color.green)
         self.gun_position = self.pos[2]  # Store initial gun position
+        self.gravity = 0
     
     def disable_movement(self):
         self.speed = 0

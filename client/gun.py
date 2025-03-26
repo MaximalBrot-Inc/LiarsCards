@@ -7,9 +7,9 @@ class Gun(ur.Entity):
     def __init__(self, master, pos, rot, color):
         super().__init__(
             parent = master,
-            model = 'cube',
-            color = color,
-            scale = (0.1, 0.1, 0.1),
+            model = 'gun.glb',
+            #color = color,
+            scale = (0.001, 0.001, 0.001),
             #origin = (1, 1, 1),
             
             rotation = rot,

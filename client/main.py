@@ -19,14 +19,13 @@ class Main:
         initialize the main class
         '''
         self.positions = {      # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
-            0: [(0, 0, -3), (0, 0, 0), (0, 1, -3), (0, 0, 0), ur.color.red],
-            1: [(0, 0, 3), (0, 180, 0), (0, 1, 3), (0, 180, 0), ur.color.blue],
-            2: [(-3, 0, -1.5), (0, 65, 0), (-3, 1, -1.5), (0, 300, 0), ur.color.green], 
-            3: [(3, 0, 1.5), (0, 245, 0), (3, 1, 1.5), (0, 120, 0), ur.color.yellow],
-            4: [(-3, 0, 1.5), (0, 115, 0), (-3, 1, 1.5), (0, 240, 0), ur.color.pink],
-            5: [(3, 0, -1.5), (0, 295, 0), (3, 1, -1.5), (0, 60, 0), ur.color.orange]
+            0: [(0, 0, -3), (0, 0, 0), (0.1, 0.833, -1.4), (0, 0, -90), ur.color.red],
+            1: [(0, 0, 3), (0, 180, 0), (-0.1, 0.833, 1.4), (0, 180, -90), ur.color.blue],
+            2: [(-3, 0, -1.5), (0, 65, 0), (-1.2, 0.833, -0.75), (0, 65, -90), ur.color.green], 
+            3: [(3, 0, 1.5), (0, 245, 0), (1, 0.833, 0.5), (0, 240, -90), ur.color.yellow],
+            4: [(-3, 0, 1.5), (0, 115, 0), (-1, 0.833, 0.5), (0, 117, -90), ur.color.pink],
+            5: [(3, 0, -1.5), (0, 295, 0), (1, 0.833, -0.5), (0, 297, -90), ur.color.orange]
         }
-        self.index = 0
         
     def window(self):
         '''
@@ -48,39 +47,41 @@ class Main:
         starts the 3D game
         '''
         #self.ui.start()
-        self.network = Network()
-        self.network.connect("127.0.0.1", 8000)
-        self.network.receive()
-        sky = ur.Sky()
-        for i in self.positions:
-            print(self.positions[i][4])
-        table = ur.Entity(
+        # self.network = Network()
+        # self.network.connect("127.0.0.1", 8000)
+        # uid, lst = self.network.receive()
+        uid = 2
+        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
+        self.table = ur.Entity(
             model="untitled",
             position=(0, 0, 0),
             scale=1.5,
             shader=lit_with_shadows_shader
         )
+        for i in lst:
+            self.spawn_people(i, uid)
+        sky = ur.Sky()
+        
+        
         #tabletop = ur.Entity(model='circle', color="#5C4033", position=(0, 1.1, 0), rotation=(90, 0, 0), scale=(4, 4, 4))
-        player = Player(table, self.positions[3])
         floor = ur.Entity(model='plane', scale=(100, 1, 100), color=ur.color.white.tint(-0.2), texture='white_cube', texture_scale=(100, 100), collider='box')
 
         
         #self.app.icon = "textures/Leserunde.ico"
-        ur.invoke(self.spawn_enemy, delay=2)
 
-    def spawn_enemy(self):
+    def spawn_people(self, player, uid_self):
         '''
         spawn the enemy
         '''
-        i = self.index
-        if i == len(self.positions):
+        uid, name, skin = player[0], player[1], player[2]
+        if skin == "default":
+            skin = "cube"
+        if uid == uid_self:
+            self.player = Player(self.table, self.positions[uid])
             return
-        enemy = Opponent(position=self.positions[i][0], scale=(0.5, 0.5, 0.5), rotation = self.positions[i][1])
-        self.index += 1
+        self.enemy = Opponent(self.table, self.positions[uid], model=skin, position=self.positions[uid][0], scale=(0.5, 0.5, 0.5), rotation = self.positions[uid][1])
         #ur.invoke(self.spawn_enemy, delay=1)
-        self.spawn_enemy()
     
-
 main = Main()
 main.window()
 main.app.run()
