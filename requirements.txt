@@ -1,2 +1,1 @@
-ursina[extras]
-socket
+ursina[extras]~=7.0.0
