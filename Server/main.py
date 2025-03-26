@@ -14,12 +14,14 @@ PORT = 8000
 clients = []
 Server = socket.create_server(("0.0.0.0", PORT),backlog=5)
 
-players =  {0: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-            1: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-            2: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-            3: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-            4: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-            5: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0}}
+#players =  {0: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
+#            1: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
+#            2: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
+#            3: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
+#            4: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
+#            5: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0}}
+
+players = {0:None,}
 
 current_player = 0
 next_player = 1
@@ -64,7 +66,17 @@ def game_loop(player_info):
             # Player has to choose a card
             pass
 
-
+def pregame_loop(player_info):
+    old_len = len(players)
+    while len(players)<5:
+        if old_len != len(players):
+            data = ""
+            for i in players:
+                data += f"{i},{players[i]['name']},{players[i]['skin']};"
+            player_info["conn"].send(data.encode())
+            old_len = len(players)
+        pass
+    game_loop(player_info)
 
 def update_players(conn, addr,  uid):
     """
@@ -97,8 +109,13 @@ def new_connection(conn, addr):
     uid = len(clients)
     player_info = update_players(conn, addr, uid)
     conn.send(f"{uid}".encode())
-    conn.send(pickle.dumps(players))
-    game_loop(player_info)
+
+    data = ""
+    for i in players:
+        data += f"{i},{players[i]['name']},{players[i]['skin']};"
+    conn.send(data.encode())
+
+    pregame_loop(player_info)
 
 
 def disconnect(conn, addr):
