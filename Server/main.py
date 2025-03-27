@@ -2,36 +2,48 @@
 Main Programm for the Server
 """
 import socket
-import threading
+#import threading
 import pickle
 import json
 import random
-
+from handlers import *
 
 MSG_SIZE = 2048
 PORT = 8000
 
 clients = []
-Server = socket.create_server(("0.0.0.0", PORT),backlog=5)
+Server = socket.create_server(("0.0.0.0", PORT), backlog=5)
 
-#players =  {0: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-#            1: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-#            2: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-#            3: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-#            4: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0},
-#            5: {"name": "Player 1", "skin": "default", "cards": [], "card_count": 0}}
-
-players = {0:None,}
+players = {}
 
 current_player = 0
-next_player = 1
+card_of_round = ""
+shuffle_done_event = threading.Event()
+cards_set = []
+
 
 #socket.bind("0.0.0.0", 8000)
+
+def connection_closed_handler(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Debug Statement")
+        try:
+            return func(*args, **kwargs)
+        except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
+            print("Handler has been called!")
+            conn, addr = args
+            disconnect(conn, addr)
+
+    return wrapper
+
 
 def shuffle_deck():
     """
     Shuffle the deck
     """
+    global card_of_round
+
     deck = []
     while len(deck) < 30:
         if len(deck) < 9:
@@ -44,41 +56,135 @@ def shuffle_deck():
             deck.append("Joker")
     random.shuffle(deck)
     random.shuffle(deck)
+    card_of_round = random.choice(["Ace", "Queen", "King"])
 
     for player in players:
         players[player]["cards"] = deck[:5]
         deck = deck[5:]
 
+    shuffle_done_event.set()
 
-def game_loop(player_info):
+
+@connection_closed_handler
+def flood_players(data, origin_uid=None):
+    """
+    Flood the players
+    :param data: data to flood
+    :param origin_uid: origin user id
+    """
+    for player in players:
+        if player != origin_uid:
+            conn = players[player]["conn"]
+            conn.send(f"{data}".encode())
+
+def increment_player():
+    """
+    Increment the player
+    """
+    global current_player
+    current_player += 1
+    if current_player == len(players):
+        current_player = 0
+
+@connection_closed_handler
+def game_loop(uid):
     """
     Game loop
-    :param player_info: player info
+    :param uid: User ID of the player
     """
-    conn = player_info["conn"]
-    shuffle_deck()
-    conn.send(pickle.dumps(players[player_info["uid"]]["cards"]))
+    global current_player
+    global cards_set
+
+    conn = players["uid"]["conn"]
+
+    if current_player == uid:
+        shuffle_deck()
+        conn.send(pickle.dumps(players["uid"]["cards"]))
+        conn.send(b"first")
+        cards_set = conn.recv(MSG_SIZE).decode().split(",")
+        flood_players(len(cards_set), "uid")
+        increment_player()
+    else:
+        # Wait until shuffling is done
+        shuffle_done_event.wait()
+        conn.send(pickle.dumps(players["uid"]["cards"]))
+
     while True:
-        if current_player == player_info["uid"]:
-            # Player's turn
-            pass
-        elif next_player == player_info["uid"]:
-            # Player has to choose a card
-            pass
+        if current_player == uid:
+            if not players["uid"]["alive"]: increment_player()
+            conn.send(b"now")
+            return_data = conn.recv(MSG_SIZE).decode()
+            if return_data == b"liar": flood_players(cards_set); liar()
+            else: cards_set=return_data.split(",")
+            increment_player()
 
-def pregame_loop(player_info):
-    old_len = len(players)
-    while len(players)<5:
-        if old_len != len(players):
-            data = ""
-            for i in players:
-                data += f"{i},{players[i]['name']},{players[i]['skin']};"
-            player_info["conn"].send(data.encode())
-            old_len = len(players)
         pass
-    game_loop(player_info)
 
-def update_players(conn, addr,  uid):
+def liar():
+    """
+    Liar
+    Check if the player is a liar and handle the consequences
+    """
+    accused_player = current_player-1
+    if accused_player == -1:
+        accused_player = len(players)-1
+
+    for card in cards_set:
+        if card != card_of_round or card != "Joker":
+            break
+    else:
+        return
+
+    random.shuffle(players[accused_player]["gun"])
+    if players[accused_player]["gun"][0]:
+        players[accused_player]["alive"] = False
+        flood_players(f"gun,{accused_player},live")
+        return
+    else:
+        players[accused_player]["gun"].pop(0)
+        flood_players(f"gun,{accused_player},blank")
+
+
+
+
+
+
+
+
+
+@connection_closed_handler
+def pregame_loop(uid):
+    old_len = len(players)
+    conn = players[uid]["conn"]
+    votes = 0
+    amount = 0
+
+    while len(players) < 6 or votes < amount:
+        votes = 0
+        amount = 0
+
+        if old_len != len(players):
+            old_len = len(players)
+
+        transfer_data = conn.recv(MSG_SIZE)
+        if transfer_data != 0:
+            if transfer_data == b"True":
+                players["uid"]["voted"] = True
+
+        for i in players:
+            if players[i]["voted"]:
+                votes += 1
+            amount += 1
+
+        data = ""
+        for i in players:
+            data += f"{i},{players[i]['name']},{players[i]['skin']},{players[i]['voted']};"
+        players["uid"]["conn"].send(data.encode())
+
+    game_loop(uid)
+
+
+def update_players(conn, addr, uid):
     """
     Update the players
     :param conn: connection
@@ -86,36 +192,39 @@ def update_players(conn, addr,  uid):
     :param uid: user id
     :return: player info
     """
-    name,skin = conn.recv(MSG_SIZE).decode().split(",")
+    name, skin = conn.recv(MSG_SIZE).decode().split(",")
+    players[uid] = {}
     players[uid]["name"] = name
     players[uid]["skin"] = skin
     players[uid]["cards"] = []
+    players[uid]["voted"] = False
+    players[uid]["alive"] = True
+    players[uid]["gun"] = [False, False, False, False, False, True]
+    players[uid]["conn"] = conn
+    players[uid]["addr"] = addr
+    random.shuffle(players[uid]["gun"])
     json.dumps(players)
 
-    player_info = players[uid].copy()
-    player_info["conn"] = conn
-    player_info["addr"] = addr
-    player_info["uid"] = uid
-    return player_info
 
-
+@connection_closed_handler
 def new_connection(conn, addr):
     """
     Handle new connections
     :param conn: connection
     :param addr: address
     """
+    conn.settimeout(0.1)
     print(f"Connection from {addr} has been established!")
     uid = len(clients)
-    player_info = update_players(conn, addr, uid)
+    update_players(conn, addr, uid)
     conn.send(f"{uid}".encode())
 
     data = ""
     for i in players:
-        data += f"{i},{players[i]['name']},{players[i]['skin']};"
+        data += f"{i},{players[i]['name']},{players[i]['skin']},{players[i]['voted']};"
     conn.send(data.encode())
 
-    pregame_loop(player_info)
+    pregame_loop(uid)
 
 
 def disconnect(conn, addr):
@@ -134,8 +243,8 @@ print(f"Server is running on port {PORT} and awaiting connections...")
 while True:
     try:
         connection, address = Server.accept()
-        client = threading.Thread(target=new_connection, args=(connection, address))
 
+        client = threading.Thread(target=new_connection, args=(connection, address))
         clients.append(client)
         client.start()
 
