@@ -133,18 +133,28 @@ def liar():
         if card != card_of_round or card != "Joker":
             break
     else:
+        flood_players(f"inno,{accused_player}")
+        gun_handler(current_player)
         return
 
-    random.shuffle(players[accused_player]["gun"])
-    if players[accused_player]["gun"][0]:
-        players[accused_player]["alive"] = False
-        flood_players(f"gun,{accused_player},live")
+    flood_players(f"liar,{accused_player}")
+    gun_handler(accused_player)
+    return
+
+
+def gun_handler(uid):
+    """
+    Gun Handler
+    """
+    random.shuffle(players[uid]["gun"])
+    if players[uid]["gun"][0]:
+        players[uid]["alive"] = False
+        flood_players(f"gun,{uid},live")
         return
     else:
-        players[accused_player]["gun"].pop(0)
-        flood_players(f"gun,{accused_player},blank")
-
-
+        players[uid]["gun"].pop(0)
+        flood_players(f"gun,{uid},blank")
+        return
 
 
 
