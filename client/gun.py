@@ -4,11 +4,10 @@ creating and handling of gun
 import ursina as ur
 import time
 class Gun(ur.Entity):
-    def __init__(self, master, pos, rot, color):
+    def __init__(self, master, pos, rot):
         super().__init__(
             parent = master,
             model = 'gun.glb',
-            #color = color,
             scale = (0.001, 0.001, 0.001),
             #origin = (1, 1, 1),
             

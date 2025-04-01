@@ -27,7 +27,7 @@ class Network(socket.socket):
         '''
         pass
 
-    def receive(self):
+    def receive_first(self):
         '''
         receive data from the server
         '''
@@ -40,6 +40,12 @@ class Network(socket.socket):
             lst.append(i)
         print(lst)
         return uid, lst
+    
+    def receive(self):
+        '''
+        receive data from the server
+        '''
+        
 
     def disconnect(self):
         '''
