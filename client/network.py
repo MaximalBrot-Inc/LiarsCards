@@ -25,7 +25,7 @@ class Network(socket.socket):
         '''
         send data to the server
         '''
-        pass
+        self.s.sendall(data.encode())
 
     def receive_first(self):
         '''

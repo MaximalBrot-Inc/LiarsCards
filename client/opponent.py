@@ -9,8 +9,19 @@ class Opponent(ur.Entity):
         super().__init__(position=pos[0], rotation=pos[1], *args, **kwargs)
         self.model = model
         self.gun = Gun(master, pos[2], pos[3])
-        self.chair = ur.Entity(model="chair", position=self.position+(0, -1, 0), rotation=self.rotation+(0, -90, 0), scale=1.5)
-
+        self.chair = ur.Entity(model="chair", 
+                               position=self.position+(0, -1, 0), 
+                               rotation=self.rotation+(0, -90, 0), 
+                               scale=1.5
+        )
+        self.name_tag = ur.Text(
+            parent=self,
+            text="username",
+            position=ur.Vec3(0, 1.3, 0),
+            scale=ur.Vec2(5, 3),
+            billboard=True,
+            origin=ur.Vec2(0, 0)
+        )
         #self.direction = ur.Vec3(0, 0, 0)
 
     

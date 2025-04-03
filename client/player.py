@@ -21,10 +21,8 @@ class Player(FirstPersonController):
         self.speed = 0
         self.jump_height = 0
         self.gravity = 0
-        
-    def input(self, key):
-        if key == "alt":
-            exit()
+    
+    
 
 
 if __name__ == '__main__':
