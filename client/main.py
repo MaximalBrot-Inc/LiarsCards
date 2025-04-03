@@ -13,17 +13,18 @@ from player import Player
 from opponent import Opponent
 from network import Network
 from ui import UI
+from lobby import Lobby
 
 
 # delete model_compressed folder
-# models_compressed_path = os.path.join("Client", "models_compressed")
-# if os.path.exists(models_compressed_path):
-#     print("Deleting models_compressed folder")
-#     for i in range(10):
-#         print(" ")
-#     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
+models_compressed_path = os.path.join("Client", "models_compressed")
+if os.path.exists(models_compressed_path):
+    print("Deleting models_compressed folder")
+    for i in range(10):
+        print(" ")
+    shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
   
-debug = True
+debug = False
 class Main:
     def __init__(self):
         '''
@@ -68,10 +69,10 @@ class Main:
         
         lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
         self.table = ur.Entity(
-            model="untitled",
+            model="table",
             position=(0, 0, 0),
             scale=1.5,
-            shader=lit_with_shadows_shader
+            #shader=lit_with_shadows_shader
         )
         for i in lst:
             self.spawn_people(i, uid)
@@ -81,6 +82,8 @@ class Main:
         #tabletop = ur.Entity(model='circle', color="#5C4033", position=(0, 1.1, 0), rotation=(90, 0, 0), scale=(4, 4, 4))
         floor = ur.Entity(model='plane', scale=(100, 1, 100), color=ur.color.white.tint(-0.2), texture='white_cube', texture_scale=(100, 100), collider='box')
         god = ur.Entity(model='hatsune_miku', scale=(100, 100, 100), color=ur.color.white.tint(-0.2), collider='box', position=(0, 300, -300), rotation=(90, -20, 0), shader=lit_with_shadows_shader)
+        
+        ui = UI(ur.camera.ui)
 
         
         #self.app.icon = "textures/Leserunde.ico"

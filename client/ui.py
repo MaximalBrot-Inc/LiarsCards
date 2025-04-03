@@ -1,31 +1,26 @@
-from ursina import *
-import time
-from ursina.prefabs.first_person_controller import FirstPersonController
+'''
+Ui for the player, for example, the voting
+'''
+import ursina as ur
 
 class UI:
-    def __init__(self):
-        window.borderless = True
-        self.start_round = False 
-        self.text_label = Text(text='Enter your name:', origin=(0, 0.5), position=(-0.3, 0.4))
-        self.input_field = InputField(default_value='', origin=(0, 0.5), position=(0.3, 0.4))
-        submit_button = Button(text='Submit', origin=(0, 0.5), position=(0, 0.2), on_click=self.button_action, scale=(0.1, 0.05))
-        start_button = Button(text='start', origin=(0, 0.5), position=(0, -0.2), on_click=self.start)
-        self.result_text = Text(text='', origin=(0, 0.5), position=(0, 0))
+    def __init__(self, master, *args, **kwargs):
 
-    def button_action(self):
-        name = self.input_field.text
-        print(f'Hello, {name}!')
-        self.result_text.text = f'Hello, {name}!'
-
-    def start(self):
-        self.start_round = True
-        entities_copy = scene.entities[:]
-        for entity in entities_copy:
-            if entity != scene: #prevent the scene itself from being destroyed.
-                destroy(entity)
-                
+        self.master = master
+        # Use a container for custom positioning
+        container = ur.Entity()
+        ur.Text('Ready:', parent=container, position=(-3.5, 0.4), scale=50)
+        ur.Text('3/3', parent=container, position=(1.5, 0.4), scale=50)
+        wp = ur.WindowPanel(
+            title='Press F3 to ready up',
+            content=(container,),  # Wrapped container in a tuple
+            popup=False,
+            position=(0.55, -0.35)
+        )
         
-                
+        def input(key):
+            if key == "f3":
+                print("Ready up!")
 
 
 if __name__ == '__main__':
