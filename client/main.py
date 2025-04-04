@@ -8,6 +8,7 @@ import threading as th
 import ursina as ur  
 from ursina.shaders import lit_with_shadows_shader
 import shutil  # Add this import
+import math
 
 from player import Player
 from opponent import Opponent
@@ -47,6 +48,15 @@ class Main(ur.Entity):
         create the window
         '''
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        width, height = ur.window.size
+        
+        gcd = math.gcd(int(width), int(height))
+
+        self.aspect_ratio = (width // gcd, height // gcd)
+        if self.aspect_ratio == (8, 5):
+            self.aspect_ratio = (16, 10)
+        
+
         #self.ui = UI()
         self.threed()
         
@@ -72,8 +82,7 @@ class Main(ur.Entity):
             scale=1.5,
             #shader=lit_with_shadows_shader
         )
-        for i in lst:
-            self.spawn_people(i, uid)
+        
         sky = ur.Sky()
         
         
@@ -97,10 +106,26 @@ class Main(ur.Entity):
         
         
         self.ui = UI(ur.camera.ui)
-
+        
+        for i in lst:
+            self.spawn_people(i, uid)
+        self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         
         #self.app.icon = "textures/Leserunde.ico"
-
+        
+    def is_ready(self):
+        if self.player_ready:
+            self.ui.count -= 1
+            self.player_ready = False
+            #self.ui.wp.enable()
+            #self.ui.text.text = "Not ready"
+            #self.network.send(False)
+        else:
+            self.ui.count += 1
+            self.player_ready = True
+        self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+        #self.network.send(self.player_ready)
+            
     def input(self, key):
         '''
         handle the inputs
@@ -112,17 +137,7 @@ class Main(ur.Entity):
             '''
             ready up
             '''
-            if self.player_ready:
-                self.ui.count -= 1
-                self.player_ready = False
-                #self.ui.wp.enable()
-                #self.ui.text.text = "Not ready"
-                #self.network.send(False)
-            else:
-                self.ui.count += 1
-                self.player_ready = True
-            self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
-
+            self.is_ready()
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
             #self.network.send(True)
@@ -132,6 +147,7 @@ class Main(ur.Entity):
         spawn the enemy
         '''
         uid, name, skin = player[0], player[1], player[2]
+        self.ui.max_player += 1
         if skin == "default":
             skin = "sphere"
         if uid == uid_self:
@@ -139,8 +155,10 @@ class Main(ur.Entity):
             return
         self.opponent = Opponent(self.table, self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5))
         
+        
 
    
 main = Main()
 main.window()
+
 main.app.run()

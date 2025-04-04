@@ -13,15 +13,17 @@ class Opponent(ur.Entity):
                                position=self.position+(0, -1, 0), 
                                rotation=self.rotation+(0, -90, 0), 
                                scale=1.5
-        )
+                            )
+        
         self.name_tag = ur.Text(
             parent=self,
             text="username",
-            position=ur.Vec3(0, 1.3, 0),
+            position=ur.Vec3(0, 2, 0),
             scale=ur.Vec2(5, 3),
             billboard=True,
             origin=ur.Vec2(0, 0)
-        )
+                                )
+        
         #self.direction = ur.Vec3(0, 0, 0)
 
     
