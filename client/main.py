@@ -106,6 +106,8 @@ class Main(ur.Entity):
         
         
         self.ui = UI(ur.camera.ui)
+        x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
+        self.ui.wp.position = (x, -0.35)
         
         for i in lst:
             self.spawn_people(i, uid)
