@@ -72,7 +72,7 @@ class Main(ur.Entity):
         # uid, lst = self.network.receive()
         
         
-        uid = 2
+        uid = 0
         
         
         lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
@@ -156,7 +156,9 @@ class Main(ur.Entity):
             self.player = Player(self.table, self.positions[uid])
             return
         self.opponent = Opponent(self.table, self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5))
-        
+        self.opponent.name_tag.text = name    
+            
+
         
 
    
