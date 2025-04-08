@@ -34,7 +34,7 @@ class Main(ur.Entity):
         '''
         
         self.player_ready = False
-        self.positions = {      # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
+        self.positions = {      # pos: [(position), (rotation), (gun_pos), (gun_rot)] of all players
             0: [(0, 1, -3), (0, 0, 0), (0.1, 0.833, -1.4), (0, 0, -90), ur.color.red],
             1: [(0, 1, 3), (0, 180, 0), (-0.1, 0.833, 1.4), (0, 180, -90), ur.color.blue],
             2: [(-3, 1, -1.5), (0, 65, 0), (-1.2, 0.833, -0.75), (0, 65, -90), ur.color.green], 
@@ -72,7 +72,7 @@ class Main(ur.Entity):
         # uid, lst = self.network.receive()
         
         
-        uid = 0
+        uid = 2
         
         
         lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
@@ -96,11 +96,11 @@ class Main(ur.Entity):
                         )
         
         god = ur.Entity(model='hatsune_miku', 
-                        scale=(100, 100, 100), 
+                        scale=200,
                         color=ur.color.white.tint(-0.2), 
                         collider='box', 
                         position=(0, 300, -300), 
-                        rotation=(90, -20, 0), 
+                        rotation=(-90, -180, 0), 
                         shader=lit_with_shadows_shader
                         )
         
@@ -162,5 +162,4 @@ class Main(ur.Entity):
    
 main = Main()
 main.window()
-
 main.app.run()
