@@ -140,6 +140,7 @@ class Main(ur.Entity):
             ready up
             '''
             self.is_ready()
+            self.player.gun_to_head()
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
             #self.network.send(True)
