@@ -25,7 +25,7 @@ if os.path.exists(models_compressed_path):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
   
-debug = False
+debug = True
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -34,14 +34,15 @@ class Main(ur.Entity):
         '''
         
         self.player_ready = False
-        self.positions = {      # pos: [(position), (rotation), (gun_pos), (gun_rot)] of all players
-            0: [(0, 1, -3), (0, 0, 0), (0.1, 0.833, -1.4), (0, 0, -90), ur.color.red],
-            1: [(0, 1, 3), (0, 180, 0), (-0.1, 0.833, 1.4), (0, 180, -90), ur.color.blue],
-            2: [(-3, 1, -1.5), (0, 65, 0), (-1.2, 0.833, -0.75), (0, 65, -90), ur.color.green], 
-            3: [(3, 1, 1.5), (0, 245, 0), (1.2, 0.833, 0.7), (0, 240, -90), ur.color.yellow],
-            4: [(-3, 1, 1.5), (0, 115, 0), (-1.3, 0.833, 0.55), (0, 117, -90), ur.color.pink],
-            5: [(3, 1, -1.5), (0, 295, 0), (1.3, 0.833, -0.55), (0, 297, -90), ur.color.orange]
+        self.positions = {
+            0: [(3.5, 1, 0.0), (0, -90, 0)],
+            1: [(1.75, 1, 3.031), (0, 210, 0)],
+            2: [(-1.75, 1, 3.031), (0, 150, 0)],
+            3: [(-3.5, 1, 0.0), (0, 90, 0)],
+            4: [(-1.75, 1, -3.031), (0, 30, 0)],
+            5: [(1.75, 1, -3.031), (0, 330, 0)]
         }
+
         
     def window(self):
         '''
@@ -72,30 +73,35 @@ class Main(ur.Entity):
         # uid, lst = self.network.receive()
         
         
-        uid = 0
+        uid = 5
         
         
         lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
-        self.table = ur.Entity(
-            model="table",
-            position=(0, 0, 0),
-            scale=1.5,
-            #shader=lit_with_shadows_shader
-        )
+        
         
         sky = ur.Sky()
         
+        self.table = ur.Entity(
+            model="table",
+            position=(0, 0, 0),
+            scale=(1.75, 1.5, 1.75),
+            #shader=lit_with_shadows_shader
+            )
         
-        #tabletop = ur.Entity(model='circle', color="#5C4033", position=(0, 1.1, 0), rotation=(90, 0, 0), scale=(4, 4, 4))
-        floor = ur.Entity(model='plane', 
-                        scale=(100, 1, 100), 
-                        color=ur.color.white.tint(-0.2), 
-                        texture='white_cube', 
-                        texture_scale=(100, 100), 
-                        collider='box'
-                        )
+        # floor = ur.Entity(model='plane', 
+        #                 scale=(100, 1, 100), 
+        #                 color=ur.color.white.tint(-0.2), 
+        #                 texture='white_cube', 
+        #                 texture_scale=(100, 100), 
+        #                 collider='box'
+        #                 )
+        room = ur.Entity(model="room.glb", 
+                        scale=1, 
+                        position=(0, 0, 0), 
+                        #shader=lit_with_shadows_shader,
+                        ) 
         
-        god = ur.Entity(model='hatsune_miku', 
+        god = ur.Entity(model='hatsune_miku',  
                         scale=200,
                         color=ur.color.white.tint(-0.2), 
                         collider='box', 
@@ -140,10 +146,25 @@ class Main(ur.Entity):
             ready up
             '''
             self.is_ready()
-            self.player.gun_to_head()
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
             #self.network.send(True)
+            
+        if key == "space":
+            '''
+            weapon to head
+            '''
+            self.player.gun.gun_to_head()
+            for i in self.positions.values():
+                for j in i:
+                    if isinstance(j, Opponent):
+                        j.gun.gun_to_head()
+            
+        if key == "control":
+            '''
+            reset gun
+            '''
+            self.player.gun.reset()
 
     def spawn_people(self, player, uid_self):
         '''
@@ -157,7 +178,8 @@ class Main(ur.Entity):
             self.player = Player(self.table, self.positions[uid])
             return
         self.opponent = Opponent(self.table, self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5))
-        self.opponent.name_tag.text = name    
+        self.opponent.name_tag.text = name 
+        self.positions[uid].append(self.opponent)   
             
 
         

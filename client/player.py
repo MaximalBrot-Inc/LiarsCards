@@ -12,8 +12,11 @@ class Player(FirstPersonController):
         # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
         #self.model = "hatsune_miku"
         self.pos = pos
-        self.gun = Gun(master, pos[2], pos[3])
+        self.gun_pos = (0.6, 0.833, -0.1)
+        self.gun_rot = (0, 90, -90)
+        #self.gun = Gun(self, pos[2], pos[3])
         self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5)
+        self.gun = Gun(self.chair, self.gun_pos, self.gun_rot)
         self.gravity = 0
         
     
@@ -22,17 +25,9 @@ class Player(FirstPersonController):
         self.jump_height = 0
         self.gravity = 0
         
-    def gun_to_head(self):
-        rot_to_achieve = self.gun.rotation + ur.Vec3(0, -180, 90)
-        pos_to_achieve = self.gun.position + ur.Vec3(-0.1, 0.5, -0.3)
+
         
-        def update():
-            self.gun.rotation = ur.lerp(self.gun.rotation, rot_to_achieve, 4 * ur.time.dt)
-            self.gun.position = ur.lerp(self.gun.position, pos_to_achieve, 4 * ur.time.dt)
-            if (self.gun.rotation - rot_to_achieve).length() < 0.01 and (self.gun.position - pos_to_achieve).length() < 0.01:
-                return
-        
-        ur.Entity(update=update)  # Attach the update function to an entity for continuous updates
+          # Attach the update function to an entity for continuous updates
     
 
 

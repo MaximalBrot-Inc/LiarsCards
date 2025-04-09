@@ -8,14 +8,13 @@ class Opponent(ur.Entity):
     def __init__(self, master, pos, model,*args, **kwargs):
         super().__init__(position=pos[0], rotation=pos[1], *args, **kwargs)
         self.model = model
-        self.gun = Gun(master, pos[2], pos[3])
         self.chair = ur.Entity(parent=self,
                             model="chair", 
                             position=(0, -2, 0), 
                             rotation=(0, -90, 0), 
                             scale=3
                             )
-        
+        self.gun = Gun(self.chair, (0.6, 0.833, -0.1), (0, 90, -90))
         self.name_tag = ur.Text(
             parent=self,
             text="username",
