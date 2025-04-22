@@ -25,7 +25,7 @@ if os.path.exists(models_compressed_path):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
   
-debug = False
+debug = True
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -76,7 +76,7 @@ class Main(ur.Entity):
         uid = 0
         
         
-        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 1", "skin2"), (4, "Player 1", "skin3"), (5, "Player 1", "default")]
+        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 2", "skin2"), (4, "Player 3", "skin3"), (5, "Player 4", "default")]
         
         
         #sky = ur.Sky()
@@ -158,7 +158,9 @@ class Main(ur.Entity):
             for i in self.positions.values():
                 for j in i:
                     if isinstance(j, Opponent):
-                        j.gun.gun_to_head()
+                        if j.model != None:
+                            print(j.model)
+                            j.gun.gun_to_head()
             
         if key == "control":
             '''
@@ -177,9 +179,9 @@ class Main(ur.Entity):
         uid, name, skin = player[0], player[1], player[2]
         self.ui.max_player += 1
         if uid == uid_self:
-            self.player = Player(self.table, self.positions[uid])
+            self.player = Player(self.positions[uid], uid)
             return
-        self.opponent = Opponent(self.table, self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5))
+        self.opponent = Opponent(self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5), uid=uid)
         self.opponent.name_tag.text = name 
         self.positions[uid].append(self.opponent)   
             

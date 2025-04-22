@@ -5,7 +5,7 @@ The enemy class will be used to create enemies that the player will play against
 import ursina as ur 
 from gun import Gun
 class Opponent(ur.Entity):
-    def __init__(self, master, pos, model,*args, **kwargs):
+    def __init__(self, pos, model,*args, **kwargs):
         super().__init__(position=pos[0], rotation=pos[1]+(0, 90, 0), *args, **kwargs)
         self.model = model
         self.scale = 2
@@ -16,7 +16,7 @@ class Opponent(ur.Entity):
                             scale=0.75
                             )
         
-        self.gun = Gun(self.chair, (0.6, 0.75, -0.1), (0, 90, -90))
+        self.gun = Gun(self.chair, (0.6, 0.75, -0.1), (0, 90, -90), self)
         self.name_tag = ur.Text(
             parent=self,
             text="username",
