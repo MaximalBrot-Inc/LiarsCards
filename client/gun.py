@@ -62,18 +62,15 @@ class Gun(ur.Entity):
     def shoot(self):
         print("bang")
             
-        self.opp.model = None
+        self.opp.visible_self = False
         self.alive = 0
         try:
             self.opp.name_tag.text += "dead"
         except:
             print("player dead")
-            self.dead()
-    
-    def dead(self):
-        self.opp.disable_movement()
-        self.opp.look_at(self.opp.chair)
-        self.mouse_sensitivity = (0, 0)  # Disable mouse input for looking around
+            self.opp.blackout()
+
+
         
             
         

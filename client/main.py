@@ -159,7 +159,6 @@ class Main(ur.Entity):
                 for j in i:
                     if isinstance(j, Opponent):
                         if j.model != None:
-                            print(j.model)
                             j.gun.gun_to_head()
             
         if key == "control":
