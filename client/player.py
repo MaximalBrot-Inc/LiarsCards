@@ -8,11 +8,11 @@ from gun import Gun
 
 class Player(FirstPersonController):
     def __init__(self, master, pos, *args, **kwargs):
-        super().__init__(position=pos[0]+(0, -1, 0), rotation=pos[1], *args, **kwargs)
+        super().__init__(position=pos[0]+(0, -0.7, 0), rotation=pos[1], *args, **kwargs)
         # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
         #self.model = "hatsune_miku"
-        self.pos = pos
-        self.gun_pos = (0.6, 0.833, -0.1)
+        self.pos = pos 
+        self.gun_pos = (0.6, 0.75, -0.1)
         self.gun_rot = (0, 90, -90)
         #self.gun = Gun(self, pos[2], pos[3])
         self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5)

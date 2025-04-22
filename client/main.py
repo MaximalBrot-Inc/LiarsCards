@@ -35,12 +35,12 @@ class Main(ur.Entity):
         
         self.player_ready = False
         self.positions = {
-            0: [(3.5, 1, 0.0), (0, -90, 0)],
-            1: [(1.75, 1, 3.031), (0, 210, 0)],
-            2: [(-1.75, 1, 3.031), (0, 150, 0)],
-            3: [(-3.5, 1, 0.0), (0, 90, 0)],
-            4: [(-1.75, 1, -3.031), (0, 30, 0)],
-            5: [(1.75, 1, -3.031), (0, 330, 0)]
+            0: [(3.5, 0.9, 0.0), (0, -90, 0)],
+            1: [(1.75, 0.9, 3.031), (0, 210, 0)],
+            2: [(-1.75, 0.9, 3.031), (0, 150, 0)],
+            3: [(-3.5, 0.9, 0.0), (0, 90, 0)],
+            4: [(-1.75, 0.9, -3.031), (0, 30, 0)],
+            5: [(1.75, 0.9, -3.031), (0, 330, 0)]
         }
 
         
@@ -76,7 +76,7 @@ class Main(ur.Entity):
         uid = 0
         
         
-        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
+        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 1", "skin2"), (4, "Player 1", "skin3"), (5, "Player 1", "default")]
         
         
         #sky = ur.Sky()
@@ -98,7 +98,7 @@ class Main(ur.Entity):
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
-                        #shader=lit_with_shadows_shader,
+                        shader=lit_with_shadows_shader,
                         ) 
         
         god = ur.Entity(model='hatsune_miku',  
@@ -176,8 +176,6 @@ class Main(ur.Entity):
         '''
         uid, name, skin = player[0], player[1], player[2]
         self.ui.max_player += 1
-        if skin == "default":
-            skin = "sphere"
         if uid == uid_self:
             self.player = Player(self.table, self.positions[uid])
             return
