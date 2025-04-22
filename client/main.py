@@ -25,7 +25,7 @@ if os.path.exists(models_compressed_path):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
   
-debug = True
+debug = False
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -73,13 +73,13 @@ class Main(ur.Entity):
         # uid, lst = self.network.receive()
         
         
-        uid = 5
+        uid = 0
         
         
         lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "default"), (3, "Player 1", "default"), (4, "Player 1", "default"), (5, "Player 1", "default")]
         
         
-        sky = ur.Sky()
+        #sky = ur.Sky()
         
         self.table = ur.Entity(
             model="table",
@@ -165,6 +165,10 @@ class Main(ur.Entity):
             reset gun
             '''
             self.player.gun.reset()
+            for i in self.positions.values():
+                for j in i:
+                    if isinstance(j, Opponent):
+                        j.gun.reset()
 
     def spawn_people(self, player, uid_self):
         '''
