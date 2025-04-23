@@ -2,11 +2,11 @@
 Main Programm for the Server
 """
 import socket
-#import threading
+import threading
 import pickle
 import json
 import random
-from handlers import *
+import functools
 
 MSG_SIZE = 2048
 PORT = 8000
@@ -105,6 +105,7 @@ def game_loop(uid):
         flood_players(len(cards_set), "uid")
         increment_player()
     else:
+        conn.send(b"sleep")
         # Wait until shuffling is done
         shuffle_done_event.wait()
         conn.send(pickle.dumps(players["uid"]["cards"]))
@@ -133,8 +134,10 @@ def liar():
         if card != card_of_round or card != "Joker":
             break
     else:
-        flood_players(f"inno,{accused_player}")
+        flood_players(f"liar,{current_player}")
         gun_handler(current_player)
+        for card in cards_set:
+            players[accused_player]["cards"].remove(card)
         return
 
     flood_players(f"liar,{accused_player}")
