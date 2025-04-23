@@ -10,7 +10,6 @@ class Network(socket.socket):
         '''
         constructor
         '''
-        pass
 
     def connect(self, domain, port):
         '''
@@ -18,7 +17,7 @@ class Network(socket.socket):
         '''
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((domain, port))
-        self.s.sendall(b'Hello world, hatsune miku')
+        self.s.sendall(b'Gurrr,skin2')
         
 
     def send(self, data):
@@ -40,18 +39,12 @@ class Network(socket.socket):
             lst.append(i)
         print(lst)
         return uid, lst
-    
-    def receive(self):
-        '''
-        receive data from the server
-        '''
-        
 
     def disconnect(self):
         '''
         disconnect from the server
         '''
-        pass
+        self.s.close()
     
 if __name__ == '__main__':
     import main

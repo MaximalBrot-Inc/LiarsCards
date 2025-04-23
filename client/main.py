@@ -68,9 +68,9 @@ class Main(ur.Entity):
         starts the 3D game
         '''
         #self.Lobby.start()
-        # self.network = Network()
-        # self.network.connect("127.0.0.1", 8000)
-        # uid, lst = self.network.receive()
+        #self.network = Network()
+        #self.network.connect("127.0.0.1", 8000)
+        #uid, lst = self.network.receive()
         
         
         uid = 0
@@ -133,6 +133,7 @@ class Main(ur.Entity):
             self.player_ready = True
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         #self.network.send(self.player_ready)
+    
             
     def input(self, key):
         '''
@@ -150,26 +151,26 @@ class Main(ur.Entity):
             #self.ui.text.text = "Ready"
             #self.network.send(True)
             
-        if key == "space":
-            '''
-            weapon to head
-            '''
-            self.player.gun.gun_to_head()
-            for i in self.positions.values():
-                for j in i:
-                    if isinstance(j, Opponent):
-                        if j.model != None:
-                            j.gun.gun_to_head()
+        # if key == "space":
+        #     '''
+        #     weapon to head
+        #     '''
+        #     self.player.gun.gun_to_head()
+        #     for i in self.positions.values():
+        #         for j in i:
+        #             if isinstance(j, Opponent):
+        #                 if j.visible_self:
+        #                     j.gun.gun_to_head()
             
-        if key == "control":
-            '''
-            reset gun
-            '''
-            self.player.gun.reset()
-            for i in self.positions.values():
-                for j in i:
-                    if isinstance(j, Opponent):
-                        j.gun.reset()
+        # if key == "control":
+        #     '''
+        #     reset gun
+        #     '''
+        #     self.player.gun.reset()
+        #     for i in self.positions.values():
+        #         for j in i:
+        #             if isinstance(j, Opponent):
+        #                 j.gun.reset()
 
     def spawn_people(self, player, uid_self):
         '''
@@ -178,9 +179,9 @@ class Main(ur.Entity):
         uid, name, skin = player[0], player[1], player[2]
         self.ui.max_player += 1
         if uid == uid_self:
-            self.player = Player(self.positions[uid], uid)
+            self.player = Player(self.positions, uid)
             return
-        self.opponent = Opponent(self.positions[uid], model=skin, scale=(0.5, 0.5, 0.5), uid=uid)
+        self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
         self.positions[uid].append(self.opponent)   
             
