@@ -68,15 +68,15 @@ class Main(ur.Entity):
         starts the 3D game
         '''
         #self.Lobby.start()
-        #self.network = Network()
-        #self.network.connect("127.0.0.1", 8000)
-        #uid, lst = self.network.receive()
+        self.network = Network()
+        self.network.connect("127.0.0.1", 8000)
+        self.uid, self.lst = self.network.receive_first()
         
         
-        uid = 0
+        self.uid = 0
         
         
-        lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 2", "skin2"), (4, "Player 3", "skin3"), (5, "Player 4", "default")]
+        self.lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 2", "skin2"), (4, "Player 3", "skin3"), (5, "Player 4", "default")]
         
         
         #sky = ur.Sky()
@@ -115,11 +115,11 @@ class Main(ur.Entity):
         x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
         self.ui.wp.position = (x, -0.35)
         
-        for i in lst:
-            self.spawn_people(i, uid)
+        for i in self.lst:
+            self.spawn_people(i, self.uid)
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         
-        #self.app.icon = "textures/Leserunde.ico"
+        self.app.icon = "textures/Leserunde.ico"
         
     def is_ready(self):
         if self.player_ready:
@@ -172,20 +172,46 @@ class Main(ur.Entity):
         #             if isinstance(j, Opponent):
         #                 j.gun.reset()
 
-    def spawn_people(self, player, uid_self):
+    def spawn_people(self, player):
         '''
         spawn the enemy
         '''
         uid, name, skin = player[0], player[1], player[2]
         self.ui.max_player += 1
-        if uid == uid_self:
+        if uid == self.uid:
             self.player = Player(self.positions, uid)
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
-        self.positions[uid].append(self.opponent)   
-            
-
+        self.positions[uid].append(self.opponent)  
+        
+    def wait(self): 
+        dic = self.network.pre_game()
+        if dic == "first":
+            self.ui.wp.disable()
+        elif dic == "sleep":
+            self.ui.wp.disable()
+        else:
+            for i in dic:
+                if i != "":
+                    uid, name, skin = i.split(",")
+                    uid = int(uid)
+                    if uid != self.uid and len(self.positions[uid]) == 3:
+                        self.spawn_people((uid, name, skin))
+                        self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+    
+    def game_start(self):
+        cards = self.network.recv()
+        
+        
+    
+    '''
+    send indexes of cards picked by player 
+    server sends amount of cards picked by player to everyone. Place cards in the middle of the table and delete them from opponents hands
+        player gets 'now' when its his turn
+    player gets prompt to call liar or place new cards
+    '''  
+    
         
 
    

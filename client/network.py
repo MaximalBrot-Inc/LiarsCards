@@ -39,6 +39,26 @@ class Network(socket.socket):
             lst.append(i)
         print(lst)
         return uid, lst
+    
+    def pre_game(self):
+        dic = self.s.recv(2048).decode()
+        if len(dic) == 1 or dic == "first":
+            return dic
+        
+        a = []
+        for i in dic.split(";"):
+            a.append(tuple(map(int, i.split(","))))
+        print(a)
+        return a
+    
+    def recv(self):
+        '''
+        receive data from the server
+        '''
+        data = self.s.recv(2048).decode()
+        if not data:
+            return None
+        return data
 
     def disconnect(self):
         '''
