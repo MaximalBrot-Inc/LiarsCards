@@ -69,7 +69,7 @@ class Main(ur.Entity):
         '''
         #self.Lobby.start()
         self.network = Network()
-        self.network.connect("127.0.0.1", 8000)
+        self.network.connect("10.5.5.58", 8000)
         self.uid, self.lst = self.network.receive_first()
         
         
@@ -115,11 +115,10 @@ class Main(ur.Entity):
         x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
         self.ui.wp.position = (x, -0.35)
         
-        for i in self.lst:
-            self.spawn_people(i, self.uid)
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         
         self.app.icon = "textures/Leserunde.ico"
+        self.wait()
         
     def is_ready(self):
         if self.player_ready:

@@ -33,6 +33,7 @@ class Network(socket.socket):
         uid = self.s.recv(2048).decode()
         print(uid)
         dic = self.s.recv(2048).decode()
+        print(dic)
         safsafd = dic.split(";")
         lst = []
         for i in safsafd:
