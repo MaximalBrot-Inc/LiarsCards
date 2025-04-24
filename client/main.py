@@ -61,7 +61,15 @@ class Main(ur.Entity):
         #self.ui = UI()
         self.threed()
         
-
+    def input_shi(var=True):
+        if var:
+            server = input("Enter server ip: ")
+            port = input("Enter server port: ")
+            name = input("Enter your name: ")
+            skin = input("Enter your skin: ")
+            return server, int(port), name + skin
+        else:
+            return "10.5.5.58", 8000, "Playe with my balls,skin2"
             
     def threed(self):
         '''
@@ -69,18 +77,21 @@ class Main(ur.Entity):
         '''
         #self.Lobby.start()
         self.network = Network()
-        self.network.connect("10.5.5.58", 8000)
+        var = False
+        server, port, name = self.input_shi(var)
+        self.network.connect(server, port)
+        self.network.send(name)
         self.uid, self.lst = self.network.receive_first()
         
         
-        self.uid = 0
+        # self.uid = 1
         
         
-        self.lst = [(0, "Player 1", "default"), (1, "Hello world", "hatsune_miku.glb"), (2, "Player 1", "skin1"), (3, "Player 2", "skin2"), (4, "Player 3", "skin3"), (5, "Player 4", "default")]
+        # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
         
         
         #sky = ur.Sky()
-        
+        self.uid = int(self.uid)
         self.table = ur.Entity(
             model="table",
             position=(0, 0, 0),
@@ -118,7 +129,9 @@ class Main(ur.Entity):
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         
         self.app.icon = "textures/Leserunde.ico"
-        self.wait()
+        for i in self.lst:
+            self.spawn_people(i)
+        th.Thread(target=self.wait, daemon=True).start()
         
     def is_ready(self):
         if self.player_ready:
@@ -175,8 +188,11 @@ class Main(ur.Entity):
         '''
         spawn the enemy
         '''
+        print(player)
         uid, name, skin = player[0], player[1], player[2]
+        print(self.uid, uid)
         self.ui.max_player += 1
+        uid = int(uid)
         if uid == self.uid:
             self.player = Player(self.positions, uid)
             return
@@ -195,7 +211,7 @@ class Main(ur.Entity):
                 if i != "":
                     uid, name, skin = i.split(",")
                     uid = int(uid)
-                    if uid != self.uid and len(self.positions[uid]) == 3:
+                    if uid != self.uid:
                         self.spawn_people((uid, name, skin))
                         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     

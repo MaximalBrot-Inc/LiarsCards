@@ -17,7 +17,6 @@ class Network(socket.socket):
         '''
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((domain, port))
-        self.s.sendall(b'Gurrr,skin2')
         
 
     def send(self, data):
@@ -33,13 +32,12 @@ class Network(socket.socket):
         uid = self.s.recv(2048).decode()
         print(uid)
         dic = self.s.recv(2048).decode()
-        print(dic)
-        safsafd = dic.split(";")
-        lst = []
-        for i in safsafd:
-            lst.append(i)
-        print(lst)
-        return uid, lst
+        a = []
+        for i in dic.split(";"):
+            a.append(tuple(i.split(",")))
+        a.pop(-1)
+        print(a)
+        return uid, a
     
     def pre_game(self):
         dic = self.s.recv(2048).decode()
