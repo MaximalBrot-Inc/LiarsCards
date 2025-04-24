@@ -20,6 +20,7 @@ current_player = 0
 card_of_round = ""
 shuffle_done_event = threading.Event()
 cards_set = []
+changes = False
 
 
 #socket.bind("0.0.0.0", 8000)
@@ -32,8 +33,9 @@ def connection_closed_handler(func):
             return func(*args, **kwargs)
         except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
             print("Handler has been called!")
-            conn, addr = args
-            disconnect(conn, addr)
+            #conn, addr = args
+            disconnect()
+            exit()
 
     return wrapper
 
@@ -99,13 +101,13 @@ def game_loop(uid):
 
     if current_player == uid:
         shuffle_deck()
-        conn.send(pickle.dumps(players["uid"]["cards"]))
         conn.send(b"first")
+        conn.send(pickle.dumps(players["uid"]["cards"]))
         cards_set = conn.recv(MSG_SIZE).decode().split(",")
         flood_players(len(cards_set), "uid")
         increment_player()
     else:
-        conn.send(b"sleep")
+        conn.send(current_player.to_bytes(4, "big"))
         # Wait until shuffling is done
         shuffle_done_event.wait()
         conn.send(pickle.dumps(players["uid"]["cards"]))
@@ -128,7 +130,7 @@ def liar():
     """
     accused_player = current_player-1
     if accused_player == -1:
-        accused_player = len(players)-1
+        accused_player = len(players)
 
     for card in cards_set:
         if card != card_of_round or card != "Joker":
@@ -170,7 +172,9 @@ def pregame_loop(uid):
     old_len = len(players)
     conn = players[uid]["conn"]
     votes = 0
-    amount = 0
+    amount = 6
+    global changes
+    changes = False
 
     while len(players) < 6 or votes < amount:
         votes = 0
@@ -178,22 +182,26 @@ def pregame_loop(uid):
 
         if old_len != len(players):
             old_len = len(players)
+            changes = True
+
 
         transfer_data = conn.recv(MSG_SIZE)
         if transfer_data != 0:
             if transfer_data == b"True":
-                players["uid"]["voted"] = True
+                players[uid]["voted"] = True
+                changes = True
 
         for i in players:
             if players[i]["voted"]:
                 votes += 1
             amount += 1
-
-        data = ""
-        for i in players:
-            data += f"{i},{players[i]['name']},{players[i]['skin']},{players[i]['voted']};"
-        players["uid"]["conn"].send(data.encode())
-
+        if changes:
+            data = ""
+            for i in players:
+                data += f"{i},{players[i]['name']},{players[i]['skin']},{players[i]['voted']};"
+            players[uid]["conn"].send(data.encode())
+            changes = False
+            
     game_loop(uid)
 
 
@@ -216,7 +224,7 @@ def update_players(conn, addr, uid):
     players[uid]["conn"] = conn
     players[uid]["addr"] = addr
     random.shuffle(players[uid]["gun"])
-    json.dumps(players)
+    #json.dumps(players)
 
 
 @connection_closed_handler
@@ -226,28 +234,34 @@ def new_connection(conn, addr):
     :param conn: connection
     :param addr: address
     """
-    conn.settimeout(0.1)
+    #conn.settimeout(0.1)
     print(f"Connection from {addr} has been established!")
-    uid = len(clients)
+    uid = len(clients)-1
     update_players(conn, addr, uid)
+    print(f"Player {uid} has joined the game with name {players[uid]['name']} and skin {players[uid]['skin']}")
     conn.send(f"{uid}".encode())
+    print(f"Player {uid} has been assigned the ID {uid}")
 
     data = ""
     for i in players:
         data += f"{i},{players[i]['name']},{players[i]['skin']},{players[i]['voted']};"
     conn.send(data.encode())
+    print(f"Informed Player {uid}")
 
     pregame_loop(uid)
 
 
-def disconnect(conn, addr):
+def disconnect(conn=None, addr=None):
     """
     Disconnect the client
     :param conn: connection
     :param addr: address
     """
-    print(f"Connection from {addr} has been terminated!")
-    conn.close()
+    if conn is not None:
+        print(f"Connection from {addr} has been terminated!")
+        conn.close()
+    else:
+        print(f"Unexpected connection termination from unknown!")
     clients.remove(threading.current_thread())
     exit()
 
