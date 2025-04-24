@@ -36,9 +36,9 @@ class Main(ur.Entity):
         self.player_ready = False
         self.positions = {
             0: [(3.5, 0.9, 0.0), (0, -90, 0)],
-            1: [(1.75, 0.9, 3.031), (0, 210, 0)],
-            2: [(-1.75, 0.9, 3.031), (0, 150, 0)],
-            3: [(-3.5, 0.9, 0.0), (0, 90, 0)],
+            1: [(-3.5, 0.9, 0.0), (0, 90, 0)],
+            2: [(1.75, 0.9, 3.031), (0, 210, 0)],
+            3: [(-1.75, 0.9, 3.031), (0, 150, 0)],
             4: [(-1.75, 0.9, -3.031), (0, 30, 0)],
             5: [(1.75, 0.9, -3.031), (0, 330, 0)]
         }
@@ -61,7 +61,7 @@ class Main(ur.Entity):
         #self.ui = UI()
         self.threed()
         
-    def input_shi(var=True):
+    def input_shi(self, var=True):
         if var:
             server = input("Enter server ip: ")
             port = input("Enter server port: ")
@@ -69,6 +69,7 @@ class Main(ur.Entity):
             skin = input("Enter your skin: ")
             return server, int(port), name + skin
         else:
+            return "127.0.0.1", 8000, "Playe with my balls,skin2"
             return "10.5.5.58", 8000, "Playe with my balls,skin2"
             
     def threed(self):
@@ -76,18 +77,18 @@ class Main(ur.Entity):
         starts the 3D game
         '''
         #self.Lobby.start()
-        self.network = Network()
-        var = False
-        server, port, name = self.input_shi(var)
-        self.network.connect(server, port)
-        self.network.send(name)
-        self.uid, self.lst = self.network.receive_first()
+        # self.network = Network()
+        # var = False
+        # server, port, name = self.input_shi(var)
+        # self.network.connect(server, port)
+        # self.network.send(name)
+        # self.uid, self.lst = self.network.receive_first()
         
         
-        # self.uid = 1
+        self.uid = 0
         
         
-        # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
+        self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
         
         
         #sky = ur.Sky()
@@ -130,8 +131,8 @@ class Main(ur.Entity):
         
         self.app.icon = "textures/Leserunde.ico"
         for i in self.lst:
-            self.spawn_people(i)
-        th.Thread(target=self.wait, daemon=True).start()
+            ur.invoke(self.spawn_people, i, delay=5)
+        #th.Thread(target=self.wait, daemon=True).start()
         
     def is_ready(self):
         if self.player_ready:
@@ -151,7 +152,8 @@ class Main(ur.Entity):
         '''
         handle the inputs
         '''
-        if key == 'alt':
+        if key == 'control':
+            self.network.disconnect()
             exit()
             
         if key == "f3":
@@ -190,7 +192,6 @@ class Main(ur.Entity):
         '''
         print(player)
         uid, name, skin = player[0], player[1], player[2]
-        print(self.uid, uid)
         self.ui.max_player += 1
         uid = int(uid)
         if uid == self.uid:

@@ -1,5 +1,8 @@
 Leserunde.ico
-tes.py
+test.py
 *.pyc
 *.bam
+*.blend
+*.glb
 todo
+

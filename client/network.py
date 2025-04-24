@@ -40,7 +40,10 @@ class Network(socket.socket):
         return uid, a
     
     def pre_game(self):
+        print("pre_game")
+        print("\n"*3)
         dic = self.s.recv(2048).decode()
+        print("pre_game")
         if len(dic) == 1 or dic == "first":
             return dic
         
