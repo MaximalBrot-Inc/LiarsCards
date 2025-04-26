@@ -26,11 +26,15 @@ class Player(FirstPersonController):
         self.gravity = 0
         
     def dead(self):
-        ur.destroy(self.death_text)
-        ur.camera.overlay.texture = "Leserunde.png"
+        try:
+            ur.destroy(self.death_text)
+        except AttributeError:
+            pass
+        ur.camera.overlay.texture = "dead.png"
         ur.camera.overlay.color = ur.color.white.tint(-0.2)
-        ur.camera.overlay.alpha_setter(0.2)
-        ur.camera.overlay.scale = (2, 2)
+        ur.camera.overlay.alpha_setter(0.9)
+        ur.camera.overlay.scale = (1.75, 1)
+        ur.camera.overlay.position = (0, 0)
         
     def blackout(self):
         ur.camera.overlay.color = ur.color.black
