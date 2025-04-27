@@ -19,6 +19,10 @@ def connection_closed_handler(func):
                 table = kwargs["table"]
             elif "player" in kwargs:
                 table = kwargs["player"].table
+            if "uid" in kwargs:
+                uid = kwargs["uid"]
+            elif "player" in kwargs:
+                uid = kwargs["player"].uid
             remove_player_from_table(table, uid)
             exit()
 
@@ -62,7 +66,7 @@ def send_message_to_player(player, message):
 def receive_message(player):
     """
     Receive a message from a player
-    :param object player: Player instance
+    :param  player: Player instance
     :return: Message received
     """
     try:
@@ -77,7 +81,7 @@ def receive_message(player):
 def disconnect(player):
     """
     Disconnect a player
-    :param object player: player instance
+    :param  player: player instance
     :return: None
     """
     player["conn"].close()
@@ -92,5 +96,7 @@ def remove_player_from_table(table, uid):
     :param uid:  User ID
     :return none:
     """
-    for uid in table:
-        del table.players[uid]
+    for i in table.players:
+        if i == uid:
+            table.players.remove(i)
+            break

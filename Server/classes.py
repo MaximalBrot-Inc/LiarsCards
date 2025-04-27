@@ -54,6 +54,9 @@ class Table(threading.Thread):
             "gun": [False, False, False, False, False, True]
         }
         self.player_count += 1
+        if DEBUG: print(f"Player {uid} added to table")
+
+        return uid
 
     def add_player_object(self, player):
         self.players[player["uid"]]["obj"] = player
@@ -95,7 +98,7 @@ class Table(threading.Thread):
         """
         self.last_player = self.current_player
         self.current_player += 1
-        while self.current_player is not self.players[self.current_player]["alive"]:
+        while not self.players[self.current_player]["alive"]:
             self.current_player += 1
             if self.current_player == self.player_count:
                 self.current_player = 0
@@ -108,7 +111,6 @@ class Table(threading.Thread):
         for uid in range(0, 6, 1):
             if uid not in self.players:
                 return uid
-            return None
         return None
 
     def pregame_loop(self):
@@ -126,8 +128,8 @@ class Table(threading.Thread):
                 changes = True
 
 
-            for player in self.players:
-                if player["voted"]:
+            for uid in self.players:
+                if uid["voted"]:
                     votes += 1
 
             if votes != last_votes:
@@ -145,7 +147,7 @@ class Table(threading.Thread):
         Game loop
         """
 
-        self.shuffle_deck(self.player_count)
+        self.shuffle_deck()
 
 
         self.players[self.current_player]["obj"].first=True
@@ -165,13 +167,13 @@ class Table(threading.Thread):
         self.players[self.current_player]["obj"].gun_handler()
 
         for card in self.cards_set:
-            if card != self.card_of_round or card != "Joker":
-                flood_players(f"liar,{self.last_player}")
+            if card != self.card_of_round and card != "Joker":
+                flood_players(f"liar,{self.last_player}", self)
                 self.players[self.last_player]["obj"].gun_handler()
                 break
 
         else:
-            flood_players(f"liar,{self.current_player}")
+            flood_players(f"liar,{self.current_player}", self)
             self.players[self.current_player]["obj"].gun_handler()
 
         return
@@ -201,7 +203,7 @@ class Player(threading.Thread):
         self.table.add_player_object(self)
 
         send_message_to_player(self, f"{self.uid}")
-        if DEBUG: print(f"Player {uid} has joined the game with name {self.name} and skin {self.skin}")
+        if DEBUG: print(f"Player {self.uid} has joined the game with name {self.name} and skin {self.skin}")
 
         self.data_dump()
         if DEBUG: print(f"Informed Player {uid}")
@@ -227,7 +229,7 @@ class Player(threading.Thread):
             self.cards_set.sort(invert)
             for card in self.cards_set:
                 self.cards.pop(card)
-            flood_players(len(self.cards_set), self.table, self.uid)
+            flood_players(f"{len(self.cards_set)}", self.table, self.uid)
             self.table.increment_player()
 
         else:
@@ -238,7 +240,7 @@ class Player(threading.Thread):
         while True:
             self.now.wait()
             send_message_to_player(self, "now")
-            return_data = receive_message(self).decode()
+            return_data = receive_message(self)
             if return_data == "liar":
                 self.table.liar_handler()
             else:
@@ -308,7 +310,7 @@ class TableManager:
         Add a player to a non-running table.
         """
         table = self.get_or_create_table()
-        table.add_player(name, skin, conn)
+        uid = table.add_player(name, skin, conn)
         return table, uid
 
 
