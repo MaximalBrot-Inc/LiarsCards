@@ -28,9 +28,7 @@ class Table(threading.Thread):
         self.pregame_loop()
 
         self.game_started = True
-        with self.start_event:
-            self.start_event.set()
-
+        self.start_event.set()
         self.game_loop()
 
     def add_player(self, name, skin, conn):
@@ -129,7 +127,7 @@ class Table(threading.Thread):
 
 
             for uid in self.players:
-                if uid["voted"]:
+                if self.players[uid]["voted"]:
                     votes += 1
 
             if votes != last_votes:
