@@ -206,7 +206,7 @@ class Player(threading.Thread):
         if DEBUG: print(f"Player {self.uid} has joined the game with name {self.name} and skin {self.skin}")
 
         self.data_dump()
-        if DEBUG: print(f"Informed Player {uid}")
+        if DEBUG: print(f"Informed Player {self.uid}")
 
         if DEBUG: print(f"Waiting for game to start")
 

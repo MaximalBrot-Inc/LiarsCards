@@ -98,5 +98,5 @@ def remove_player_from_table(table, uid):
     """
     for i in table.players:
         if i == uid:
-            table.players.remove(i)
+            del table.players[i]
             break
