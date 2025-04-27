@@ -2,14 +2,30 @@ import random
 import threading
 from networking import *
 
+DEBUG = True
 
-class Table:
+class Table(threading.Thread):
     def __init__(self):
+        super().__init__()
         self.players = {}
         self.card_of_round = None
         self.current_player = 0
         self.player_count = 0
         self.game_started = False
+        self.start_event = threading.Event()
+
+    def run(self):
+        """
+        Run the game loop
+        """
+        if DEBUG: print("Table started")
+        self.pregame_loop()
+
+        self.game_started = True
+        with self.start_event:
+            self.start_event.set()
+
+        self.game_loop()
 
     def add_player(self, name, skin, conn):
         """
@@ -31,6 +47,7 @@ class Table:
             "cards": [],
             "gun": [False, False, False, False, False, True]
         }
+        self.player_count += 1
 
     def shuffle_deck(self):
         """
@@ -73,7 +90,7 @@ class Table:
         Generate a unique user ID
         :return: Unique user ID
         """
-        for uid in range(0,6,1):
+        for uid in range(0, 6, 1):
             if uid not in self.players:
                 return uid
             return None
@@ -83,7 +100,6 @@ class Table:
         """
         Game loop
         """
-
 
         if current_player == uid:
             self.shuffle_deck()
@@ -104,12 +120,14 @@ class Table:
                 conn.send(b"now")
                 return_data = conn.recv(MSG_SIZE).decode()
                 if return_data == b"liar":
-                    flood_players(cards_set); liar()
+                    flood_players(cards_set);
+                    liar()
                 else:
                     cards_set = return_data.split(",")
                 increment_player()
 
             pass
+
 
 class Player(threading.Thread):
     def __init__(self, connection, table, uid, name, skin):
@@ -119,9 +137,28 @@ class Player(threading.Thread):
         self.name = name
         self.skin = skin
         self.connection = connection
-        self.alive = True
-        self.voted = False
-        self.gun = None
+        self.alive = self.table.players[self.uid]["alive"]
+        self.voted = self.table.players[self.uid]["voted"]
+        self.gun = self.table.players[self.uid]["gun"]
+
+    def run(self):
+        """
+        Run the player thread
+        """
+        if DEBUG: print(f"Player {self.uid} started")
+
+        send_message_to_player(self.connection, f"{self.uid}")
+        if DEBUG: print(f"Player {uid} has joined the game with name {self.name} and skin {self.skin}")
+
+        data = ""
+        for i in self.table.players:
+            data += f"{i},{self.table.players[i]['name']},{self.table.players[i]['skin']},{self.table.players[i]['voted']};"
+        send_message_to_player(self.connection, f"players,{data}")
+        print(f"Informed Player {uid}")
+
+        with self.table.start_event:
+            while not self.table.start_event.is_set():
+                self.table.start_event.wait()
 
 
     def gun_handler(self):
@@ -131,11 +168,11 @@ class Player(threading.Thread):
         random.shuffle(self.gun)
         if self.gun[0]:
             self.alive = False
-            flood_players(f"gun,{self.uid},live", self.server, self.uid)
+            flood_players(f"gun,{self.uid},live", self.table, self.uid)
             return
         else:
             self.gun.pop(0)
-            flood_players(f"gun,{self.uid},blank", self.server, self.uid)
+            flood_players(f"gun,{self.uid},blank", self.table, self.uid)
             return
 
 
@@ -156,6 +193,7 @@ class TableManager:
 
         # Create a new table if no non-running table is found
         new_table = Table()
+        new_table.start()
         self.tables.append(new_table)
         return new_table
 
@@ -166,6 +204,7 @@ class TableManager:
         table = self.get_or_create_table()
         table.add_player(name, skin, conn)
         return table, uid
+
 
 def remove_player_from_table(table, uid):
     """

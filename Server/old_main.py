@@ -24,7 +24,7 @@ changes = False
 
 
 #socket.bind("0.0.0.0", 8000)
-#TODO
+
 def connection_closed_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -67,7 +67,7 @@ def shuffle_deck():
     shuffle_done_event.set()
 
 
-#TODO
+
 @connection_closed_handler
 def flood_players(data, origin_uid=None):
     """
@@ -208,7 +208,7 @@ def pregame_loop(uid):
             
     game_loop(uid)
 
-#TODO
+
 def update_players(conn, addr, uid):
     """
     Update the players
@@ -230,7 +230,7 @@ def update_players(conn, addr, uid):
     random.shuffle(players[uid]["gun"])
     #json.dumps(players)
 
-#TODO
+
 @connection_closed_handler
 def new_connection(conn, addr):
     """
