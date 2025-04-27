@@ -4,31 +4,36 @@ This module handles the communication between the server and the players.
 """
 import functools
 
-
 MSG_SIZE = 2048
 
+
+# Decorator to handle connection closed exceptions
 def connection_closed_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        print("Debug Statement")
         try:
             return func(*args, **kwargs)
         except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
-            print("Handler has been called!")
-            #conn, addr = args
-            #disconnect()
+            print("Connection closed")
+            if "table" in kwargs:
+                table = kwargs["table"]
+            elif "player" in kwargs:
+                table = kwargs["player"].table
+            remove_player_from_table(table, uid)
             exit()
 
     return wrapper
+
+
 
 @connection_closed_handler
 def flood_players(message, table, sender_uid=None):
     """
     Flood Players
     Send a message to all players
-    :param message: Message to send
-    :param table: Server instance
-    :param sender_uid: User ID of the sender
+    :param str message: Message to send
+    :param obj table: Server instance
+    :param int sender_uid: User ID of the sender
     :return: None
     """
     if sender_uid is not None:
@@ -41,6 +46,7 @@ def flood_players(message, table, sender_uid=None):
             if player["alive"]:
                 player["conn"].sendall(message.encode())
 
+
 @connection_closed_handler
 def send_message_to_player(player, message):
     """
@@ -49,17 +55,18 @@ def send_message_to_player(player, message):
     :param message: Message to send
     :return: None
     """
-    player["conn"].sendall(message.encode())
+    player.connection.sendall(message.encode())
+
 
 @connection_closed_handler
 def receive_message(player):
     """
     Receive a message from a player
-    :param player: Player instance
+    :param object player: Player instance
     :return: Message received
     """
     try:
-        message = player["conn"].recv(MSG_SIZE).decode()
+        message = player.connection.recv(MSG_SIZE).decode()
         return message
     except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
         print("Connection closed")
@@ -70,8 +77,20 @@ def receive_message(player):
 def disconnect(player):
     """
     Disconnect a player
-    :param player: player instance
+    :param object player: player instance
     :return: None
     """
     player["conn"].close()
+    remove_player_from_table(player["table"], player["uid"])
     player["alive"] = False
+
+
+def remove_player_from_table(table, uid):
+    """
+    Remove a player from the table
+    :param table: table instance to remove the player from
+    :param uid:  User ID
+    :return none:
+    """
+    for uid in table:
+        del table.players[uid]

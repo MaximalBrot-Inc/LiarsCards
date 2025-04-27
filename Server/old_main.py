@@ -90,7 +90,7 @@ def increment_player():
     if current_player == len(players):
         current_player = 0
 
-#TODO
+
 @connection_closed_handler
 def game_loop(uid):
     """
@@ -127,7 +127,7 @@ def game_loop(uid):
         pass
 
 
-#TODO
+
 def liar():
     """
     Liar

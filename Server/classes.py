@@ -18,6 +18,7 @@ class Table(threading.Thread):
         self.last_player = 0
         self.start_event = threading.Event()
         self.cards_set = []
+        self.deck = []
 
     def run(self):
         """
@@ -61,17 +62,22 @@ class Table(threading.Thread):
         """
         Shuffle the deck
         """
+        deck = self.deck
 
-        deck = []
-        while len(deck) < 30:
-            if len(deck) < 9:
-                deck.append("Ace")
-            elif len(deck) < 18:
-                deck.append("Queen")
-            elif len(deck) < 27:
-                deck.append("King")
-            else:
-                deck.append("Joker")
+        if DEBUG: print("Shuffling deck")
+
+        if self.player_count == 6:
+            while len(deck) < 30:
+                if len(deck) < 9:
+                    deck.append("Ace")
+                elif len(deck) < 18:
+                    deck.append("Queen")
+                elif len(deck) < 27:
+                    deck.append("King")
+                else:
+                    deck.append("Joker")
+        else:
+            raise PermissionError("Not enough players / Not implemented yet")
 
         random.shuffle(deck)
         random.shuffle(deck)
@@ -139,7 +145,7 @@ class Table(threading.Thread):
         Game loop
         """
 
-        self.shuffle_deck()
+        self.shuffle_deck(self.player_count)
 
 
         self.players[self.current_player]["obj"].first=True
@@ -194,7 +200,7 @@ class Player(threading.Thread):
         if DEBUG: print(f"Player {self.uid} started")
         self.table.add_player_object(self)
 
-        send_message_to_player(self.connection, f"{self.uid}")
+        send_message_to_player(self, f"{self.uid}")
         if DEBUG: print(f"Player {uid} has joined the game with name {self.name} and skin {self.skin}")
 
         self.data_dump()
@@ -215,9 +221,9 @@ class Player(threading.Thread):
         if DEBUG: print(f"Game loop started for player {self.uid}")
 
         if self.first:
-            send_message_to_player(self.connection, "first")
-            send_message_to_player(self.connection, pickle.dumps(self.table.players[self.uid]["cards"]))
-            self.cards_set = receive_message(self.connection).split(",")
+            send_message_to_player(self, "first")
+            send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            self.cards_set = receive_message(self).split(",")
             self.cards_set.sort(invert)
             for card in self.cards_set:
                 self.cards.pop(card)
@@ -225,14 +231,14 @@ class Player(threading.Thread):
             self.table.increment_player()
 
         else:
-            send_message_to_player(self.connection, self.table.current_player.to_bytes(4, "big"))
-            send_message_to_player(self.connection, pickle.dumps(self.table.players[self.uid]["cards"]))
+            send_message_to_player(self, self.table.current_player.to_bytes(4, "big"))
+            send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
 
         while True:
             self.now.wait()
-            send_message_to_player(self.connection, "now")
-            return_data = receive_message(self.connection).decode()
+            send_message_to_player(self, "now")
+            return_data = receive_message(self).decode()
             if return_data == "liar":
                 self.table.liar_handler()
             else:
@@ -245,7 +251,7 @@ class Player(threading.Thread):
         Vote Handler
         """
         while not self.table.start_event.is_set():
-            msg = receive_message
+            msg = receive_message(self)
             if msg == "True":
                 self.table.players[self.uid]["voted"] = True
             elif msg == "False":
@@ -259,7 +265,7 @@ class Player(threading.Thread):
         data = ""
         for i in self.table.players:
             data += f"{i},{self.table.players[i]['name']},{self.table.players[i]['skin']},{self.table.players[i]['voted']};"
-        send_message_to_player(self.connection, data)
+        send_message_to_player(self, data)
 
     def gun_handler(self):
         """
@@ -306,12 +312,4 @@ class TableManager:
         return table, uid
 
 
-def remove_player_from_table(table, uid):
-    """
-    Remove a player from the table
-    :param table: table instance to remove the player from
-    :param uid:  User ID
-    :return none:
-    """
-    for uid in table:
-        del table.players[uid]
+
