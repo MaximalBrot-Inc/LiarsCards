@@ -127,7 +127,7 @@ class Table(threading.Thread):
 
 
             for uid in self.players:
-                if uid["voted"]:
+                if self.players[uid]["voted"]:
                     votes += 1
 
             if votes != last_votes:
