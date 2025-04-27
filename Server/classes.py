@@ -1,0 +1,178 @@
+import random
+import threading
+from networking import *
+
+
+class Table:
+    def __init__(self):
+        self.players = {}
+        self.card_of_round = None
+        self.current_player = 0
+        self.player_count = 0
+        self.game_started = False
+
+    def add_player(self, name, skin, conn):
+        """
+        Add a player to the table
+        :param name: Name of the player
+        :param skin: Skin of the player
+        :param conn: Connection object of the player
+        """
+        uid = self.generate_uid()
+        if uid is None:
+            raise SystemError("Problem with UID generation")
+        self.players[uid] = {
+            "uid": uid,
+            "name": name,
+            "skin": skin,
+            "conn": conn,
+            "alive": True,
+            "voted": False,
+            "cards": [],
+            "gun": [False, False, False, False, False, True]
+        }
+
+    def shuffle_deck(self):
+        """
+        Shuffle the deck
+        """
+
+        deck = []
+        while len(deck) < 30:
+            if len(deck) < 9:
+                deck.append("Ace")
+            elif len(deck) < 18:
+                deck.append("Queen")
+            elif len(deck) < 27:
+                deck.append("King")
+            else:
+                deck.append("Joker")
+
+        random.shuffle(deck)
+        random.shuffle(deck)
+        self.card_of_round = random.choice(["Ace", "Queen", "King"])
+
+        for player in self.players:
+            self.players[player]["cards"] = deck[:5]
+            deck = deck[5:]
+
+        #shuffle_done_event.set()
+
+    def increment_player(self):
+        """
+        Increment the player
+        """
+        self.current_player += 1
+        while self.current_player is not self.players[self.current_player]["alive"]:
+            self.current_player += 1
+            if self.current_player == self.player_count:
+                self.current_player = 0
+
+    def generate_uid(self):
+        """
+        Generate a unique user ID
+        :return: Unique user ID
+        """
+        for uid in range(0,6,1):
+            if uid not in self.players:
+                return uid
+            return None
+        return None
+
+    def game_loop(self):
+        """
+        Game loop
+        """
+
+
+        if current_player == uid:
+            self.shuffle_deck()
+            conn.send(b"first")
+            conn.send(pickle.dumps(players["uid"]["cards"]))
+            cards_set = conn.recv(MSG_SIZE).decode().split(",")
+            flood_players(len(cards_set), "uid")
+            self.increment_player()
+        else:
+            conn.send(current_player.to_bytes(4, "big"))
+            # Wait until shuffling is done
+            shuffle_done_event.wait()
+            conn.send(pickle.dumps(players["uid"]["cards"]))
+
+        while True:
+            if current_player == uid:
+                if not players["uid"]["alive"]: self.increment_player()
+                conn.send(b"now")
+                return_data = conn.recv(MSG_SIZE).decode()
+                if return_data == b"liar":
+                    flood_players(cards_set); liar()
+                else:
+                    cards_set = return_data.split(",")
+                increment_player()
+
+            pass
+
+class Player(threading.Thread):
+    def __init__(self, connection, table, uid, name, skin):
+        super().__init__()
+        self.table = table
+        self.uid = uid
+        self.name = name
+        self.skin = skin
+        self.connection = connection
+        self.alive = True
+        self.voted = False
+        self.gun = None
+
+
+    def gun_handler(self):
+        """
+        Gun Handler
+        """
+        random.shuffle(self.gun)
+        if self.gun[0]:
+            self.alive = False
+            flood_players(f"gun,{self.uid},live", self.server, self.uid)
+            return
+        else:
+            self.gun.pop(0)
+            flood_players(f"gun,{self.uid},blank", self.server, self.uid)
+            return
+
+
+
+
+class TableManager:
+    def __init__(self):
+        self.tables = []
+        self.active_threads = []
+
+    def get_or_create_table(self):
+        """
+        Find a non-running table or create a new one.
+        """
+        for table in self.tables:
+            if not table.game_started:
+                return table
+
+        # Create a new table if no non-running table is found
+        new_table = Table()
+        self.tables.append(new_table)
+        return new_table
+
+    def add_player_to_table(self, name, skin, conn):
+        """
+        Add a player to a non-running table.
+        """
+        table = self.get_or_create_table()
+        table.add_player(name, skin, conn)
+        return table, uid
+
+def remove_player_from_table(table, uid):
+    """
+    Remove a player from the table
+    :param table: table instance to remove the player from
+    :param uid:  User ID
+    :return none:
+    """
+    for uid in table:
+        del table.players[uid]
