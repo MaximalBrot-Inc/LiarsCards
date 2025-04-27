@@ -13,6 +13,8 @@ PORT = 8000
 
 Server = socket.create_server(("0.0.0.0", PORT))
 
+print("Server started on port " + str(PORT))
+
 # Im Hauptprogramm
 table_manager = TableManager()
 

@@ -1,5 +1,8 @@
 import random
 import threading
+import pickle
+from operator import invert
+
 from networking import *
 
 DEBUG = True
@@ -12,7 +15,9 @@ class Table(threading.Thread):
         self.current_player = 0
         self.player_count = 0
         self.game_started = False
+        self.last_player = 0
         self.start_event = threading.Event()
+        self.cards_set = []
 
     def run(self):
         """
@@ -49,6 +54,9 @@ class Table(threading.Thread):
         }
         self.player_count += 1
 
+    def add_player_object(self, player):
+        self.players[player["uid"]]["obj"] = player
+
     def shuffle_deck(self):
         """
         Shuffle the deck
@@ -79,6 +87,7 @@ class Table(threading.Thread):
         """
         Increment the player
         """
+        self.last_player = self.current_player
         self.current_player += 1
         while self.current_player is not self.players[self.current_player]["alive"]:
             self.current_player += 1
@@ -130,32 +139,36 @@ class Table(threading.Thread):
         Game loop
         """
 
-        if current_player == uid:
-            self.shuffle_deck()
-            conn.send(b"first")
-            conn.send(pickle.dumps(players["uid"]["cards"]))
-            cards_set = conn.recv(MSG_SIZE).decode().split(",")
-            flood_players(len(cards_set), "uid")
-            self.increment_player()
-        else:
-            conn.send(current_player.to_bytes(4, "big"))
-            # Wait until shuffling is done
-            shuffle_done_event.wait()
-            conn.send(pickle.dumps(players["uid"]["cards"]))
+        self.shuffle_deck()
 
-        while True:
-            if current_player == uid:
-                if not players["uid"]["alive"]: self.increment_player()
-                conn.send(b"now")
-                return_data = conn.recv(MSG_SIZE).decode()
-                if return_data == b"liar":
-                    flood_players(cards_set);
-                    liar()
-                else:
-                    cards_set = return_data.split(",")
-                increment_player()
 
+        self.players[self.current_player]["obj"].first=True
+
+        for player in self.players:
+            player.game_loop()
+        #while self.game_started:
+
+        while self.game_started:
             pass
+
+    def liar_handler(self):
+        """
+        Liar Handler
+        """
+        self.players[self.current_player]["obj"].now.notify_all()
+        self.players[self.current_player]["obj"].gun_handler()
+
+        for card in self.cards_set:
+            if card != self.card_of_round or card != "Joker":
+                flood_players(f"liar,{self.last_player}")
+                self.players[self.last_player]["obj"].gun_handler()
+                break
+
+        else:
+            flood_players(f"liar,{self.current_player}")
+            self.players[self.current_player]["obj"].gun_handler()
+
+        return
 
 
 class Player(threading.Thread):
@@ -168,13 +181,18 @@ class Player(threading.Thread):
         self.connection = connection
         self.alive = self.table.players[self.uid]["alive"]
         self.voted = self.table.players[self.uid]["voted"]
+        self.cards = self.table.players[self.uid]["cards"]
         self.gun = self.table.players[self.uid]["gun"]
+        self.first = False
+        self.now = threading.Condition()
+        self.cards_set = self.table.cards_set
 
     def run(self):
         """
         Run the player thread
         """
         if DEBUG: print(f"Player {self.uid} started")
+        self.table.add_player_object(self)
 
         send_message_to_player(self.connection, f"{self.uid}")
         if DEBUG: print(f"Player {uid} has joined the game with name {self.name} and skin {self.skin}")
@@ -190,6 +208,37 @@ class Player(threading.Thread):
 
             self.table.start_event.wait()
 
+    def game_loop(self):
+        """
+        Game loop
+        """
+        if DEBUG: print(f"Game loop started for player {self.uid}")
+
+        if self.first:
+            send_message_to_player(self.connection, "first")
+            send_message_to_player(self.connection, pickle.dumps(self.table.players[self.uid]["cards"]))
+            self.cards_set = receive_message(self.connection).split(",")
+            self.cards_set.sort(invert)
+            for card in self.cards_set:
+                self.cards.pop(card)
+            flood_players(len(self.cards_set), self.table, self.uid)
+            self.table.increment_player()
+
+        else:
+            send_message_to_player(self.connection, self.table.current_player.to_bytes(4, "big"))
+            send_message_to_player(self.connection, pickle.dumps(self.table.players[self.uid]["cards"]))
+
+
+        while True:
+            self.now.wait()
+            send_message_to_player(self.connection, "now")
+            return_data = receive_message(self.connection).decode()
+            if return_data == "liar":
+                self.table.liar_handler()
+            else:
+                self.cards_set = return_data.split(",")
+                flood_players(self.cards_set, self.table, self.uid)
+                self.table.increment_player()
 
     def vote_handler(self):
         """
