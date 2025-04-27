@@ -28,9 +28,7 @@ class Table(threading.Thread):
         self.pregame_loop()
 
         self.game_started = True
-        with self.start_event:
-            self.start_event.set()
-
+        self.start_event.set()
         self.game_loop()
 
     def add_player(self, name, skin, conn):
