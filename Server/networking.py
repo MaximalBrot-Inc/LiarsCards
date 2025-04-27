@@ -51,6 +51,21 @@ def send_message_to_player(player, message):
     """
     player["conn"].sendall(message.encode())
 
+@connection_closed_handler
+def receive_message(player):
+    """
+    Receive a message from a player
+    :param player: Player instance
+    :return: Message received
+    """
+    try:
+        message = player["conn"].recv(MSG_SIZE).decode()
+        return message
+    except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
+        print("Connection closed")
+        disconnect(player)
+        return None
+
 
 def disconnect(player):
     """

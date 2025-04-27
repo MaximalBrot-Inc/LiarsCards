@@ -170,7 +170,7 @@ def gun_handler(uid):
 
 
 
-#TODO
+
 @connection_closed_handler
 def pregame_loop(uid):
     old_len = len(players)

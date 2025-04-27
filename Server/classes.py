@@ -96,6 +96,35 @@ class Table(threading.Thread):
             return None
         return None
 
+    def pregame_loop(self):
+        votes = 0
+        old_len = 0
+        last_votes = 0
+
+
+        while len(self.players) < 6 or votes < len(self.players):
+            votes = 0
+            changes = False
+
+            if old_len != len(self.players):
+                old_len = len(self.players)
+                changes = True
+
+
+            for player in self.players:
+                if player["voted"]:
+                    votes += 1
+
+            if votes != last_votes:
+                changes = True
+                last_votes = votes
+
+            if changes:
+                for player in self.players:
+                    player.data_dump()
+
+
+
     def game_loop(self):
         """
         Game loop
@@ -150,16 +179,38 @@ class Player(threading.Thread):
         send_message_to_player(self.connection, f"{self.uid}")
         if DEBUG: print(f"Player {uid} has joined the game with name {self.name} and skin {self.skin}")
 
+        self.data_dump()
+        if DEBUG: print(f"Informed Player {uid}")
+
+        if DEBUG: print(f"Waiting for game to start")
+
+        while not self.table.start_event.is_set():
+            self.sub_thread=threading.Thread(target=self.table.start_event.wait)
+            self.sub_thread.start()
+
+            self.table.start_event.wait()
+
+
+    def vote_handler(self):
+        """
+        Vote Handler
+        """
+        while not self.table.start_event.is_set():
+            msg = receive_message
+            if msg == "True":
+                self.table.players[self.uid]["voted"] = True
+            elif msg == "False":
+                self.table.players[self.uid]["voted"] = False
+
+
+    def data_dump(self):
+        """
+        Data Dump
+        """
         data = ""
         for i in self.table.players:
             data += f"{i},{self.table.players[i]['name']},{self.table.players[i]['skin']},{self.table.players[i]['voted']};"
-        send_message_to_player(self.connection, f"players,{data}")
-        print(f"Informed Player {uid}")
-
-        with self.table.start_event:
-            while not self.table.start_event.is_set():
-                self.table.start_event.wait()
-
+        send_message_to_player(self.connection, data)
 
     def gun_handler(self):
         """
