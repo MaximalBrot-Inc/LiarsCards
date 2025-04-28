@@ -7,6 +7,7 @@ from networking import *
 
 DEBUG = True
 
+
 class Table(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -19,6 +20,7 @@ class Table(threading.Thread):
         self.start_event = threading.Event()
         self.cards_set = []
         self.deck = []
+        self.liar_event = threading.Event()
 
     def run(self):
         """
@@ -88,6 +90,7 @@ class Table(threading.Thread):
         for uid in self.players:
             self.players[uid]["cards"] = deck[:5]
             deck = deck[5:]
+            self.players[uid]["obj"].reshuffle.set()
 
         #shuffle_done_event.set()
 
@@ -117,7 +120,6 @@ class Table(threading.Thread):
         old_len = 0
         last_votes = 0
 
-
         while len(self.players) < 6 or votes < len(self.players):
             try:
                 votes = 0
@@ -126,7 +128,6 @@ class Table(threading.Thread):
                 if old_len != len(self.players):
                     old_len = len(self.players)
                     changes = True
-
 
                 for uid in self.players:
                     if self.players[uid]["voted"]:
@@ -146,33 +147,34 @@ class Table(threading.Thread):
                 if DEBUG: print("RuntimeError in pregame loop :", e)
                 pass
 
-
-
-
     def game_loop(self):
         """
         Game loop
         """
 
         self.shuffle_deck()
+        alive_players = self.player_count
 
-
-        self.players[self.current_player]["obj"].first=True
+        self.players[self.current_player]["obj"].first = True
 
         for uid in self.players:
             self.players[uid]["obj"].game_loop()
         #while self.game_started:
 
-        while self.game_started:
-            pass
+        while self.game_started and alive_players >= 1:
+            alive_players = self.player_count
+            for uid in self.players:
+                if not self.players[uid]["alive"]:
+                    alive_players -= 1
+
+            if self.liar_event.is_set():
+                self.liar_event.clear()
+                self.liar_handler()
 
     def liar_handler(self):
         """
         Liar Handler
         """
-        self.players[self.current_player]["obj"].now.notify_all()
-        self.players[self.current_player]["obj"].gun_handler()
-
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
@@ -182,6 +184,8 @@ class Table(threading.Thread):
         else:
             flood_players(f"liar,{self.current_player}", self)
             self.players[self.current_player]["obj"].gun_handler()
+
+        self.shuffle_deck()
 
         return
 
@@ -201,6 +205,8 @@ class Player(threading.Thread):
         self.first = False
         self.now = threading.Condition()
         self.cards_set = self.table.cards_set
+        self.reshuffle = threading.Event()
+        self.sub_thread = None
 
     def run(self):
         """
@@ -220,7 +226,7 @@ class Player(threading.Thread):
         if DEBUG: print(f"Waiting for game to start")
 
         while not self.table.start_event.is_set():
-            self.sub_thread=threading.Thread(target=self.vote_handler)
+            self.sub_thread = threading.Thread(target=self.vote_handler)
             self.sub_thread.start()
 
             self.table.start_event.wait()
@@ -245,13 +251,15 @@ class Player(threading.Thread):
             send_message_to_player(self, self.table.current_player.to_bytes(4, "big"))
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
+        self.subthread = threading.Thread(target=self.shuffle_handler)
+        self.subthread.start()
 
         while True:
             self.now.wait()
             send_message_to_player(self, "now")
             return_data = receive_message(self)
             if return_data == "liar":
-                self.table.liar_handler()
+                self.table.liar_event.set()
             else:
                 self.cards_set = return_data.split(",")
                 flood_players(self.cards_set, self.table, self.uid)
@@ -267,6 +275,14 @@ class Player(threading.Thread):
                 self.table.players[self.uid]["voted"] = True
             elif msg == "False":
                 self.table.players[self.uid]["voted"] = False
+
+    def shuffle_handler(self):
+        """
+        Shuffle Handler
+        """
+        self.reshuffle.wait()
+        self.reshuffle.clear()
+        send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
 
     def data_dump(self):
@@ -291,8 +307,6 @@ class Player(threading.Thread):
             self.gun.pop(0)
             flood_players(f"gun,{self.uid},blank", self.table, self.uid)
             return
-
-
 
 
 class TableManager:
@@ -321,6 +335,3 @@ class TableManager:
         table = self.get_or_create_table()
         uid = table.add_player(name, skin, conn)
         return table, uid
-
-
-

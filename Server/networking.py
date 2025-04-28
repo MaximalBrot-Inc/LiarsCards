@@ -15,6 +15,7 @@ def connection_closed_handler(func):
             return func(*args, **kwargs)
         except (ConnectionResetError, ConnectionAbortedError, ConnectionError, BrokenPipeError, OSError):
             print("Connection closed")
+            table, uid = None, None
             for arg in args:
                 print(arg)
                 if hasattr(arg, "table"):
@@ -30,7 +31,9 @@ def connection_closed_handler(func):
                         print("No UID provided for player removal.")
                         return
                     break
-            remove_player_from_table(table, uid)
+
+            if table is not None and uid is not None:
+                remove_player_from_table(table, uid)
             exit()
 
     return wrapper
