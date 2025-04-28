@@ -9,6 +9,7 @@ import ursina as ur
 from ursina.shaders import lit_with_shadows_shader
 import shutil  # Add this import
 import math
+import keyboard as kb
 
 from player import Player
 from opponent import Opponent
@@ -133,6 +134,8 @@ class Main(ur.Entity):
         for i in self.lst:
             self.spawn_people(i)
         th.Thread(target=self.wait, daemon=True).start()
+        ur.invoke(kb.press_and_release, "alt+tab", delay=0.5)
+        
         
     def is_ready(self):
         if self.player_ready:
