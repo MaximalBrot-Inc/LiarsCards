@@ -1,6 +1,7 @@
 import random
 import threading
 import pickle
+import time
 from operator import invert
 
 from networking import *
@@ -240,6 +241,7 @@ class Player(threading.Thread):
 
         if self.first:
             send_message_to_player(self, "first")
+            time.sleep(0.01)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
             self.cards_set = receive_message(self).split(",")
             self.cards_set.sort(invert)
@@ -250,6 +252,7 @@ class Player(threading.Thread):
 
         else:
             send_message_to_player(self, "sleep")
+            time.sleep(0.01)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
         self.subthread = threading.Thread(target=self.shuffle_handler)
