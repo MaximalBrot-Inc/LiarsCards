@@ -77,18 +77,18 @@ class Main(ur.Entity):
         starts the 3D game
         '''
         #self.Lobby.start()
-        # self.network = Network()
-        # var = False
-        # server, port, name = self.input_shi(var)
-        # self.network.connect(server, port)
-        # self.network.send(name)
-        # self.uid, self.lst = self.network.receive_first()
+        self.network = Network()
+        var = False
+        server, port, name = self.input_shi(var)
+        self.network.connect(server, port)
+        self.network.send(name)
+        self.uid, self.lst = self.network.receive_first()
         
         
-        self.uid = 0
+        # self.uid = 0
         
         
-        self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
+        # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
         
         
         #sky = ur.Sky()
