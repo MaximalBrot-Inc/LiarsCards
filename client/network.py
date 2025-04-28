@@ -46,10 +46,10 @@ class Network(socket.socket):
         print("pre_game")
         if len(dic) == 1 or dic == "first":
             return dic
-        
+
         a = []
         for i in dic.split(";"):
-            i[0] = int(i[0])
+            print(i)
             a.append(tuple(i.split(",")))
         a.pop(-1)
         print(a)
