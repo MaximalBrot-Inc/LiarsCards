@@ -1,1 +1,2 @@
 ursina[extras]~=7.0.0
+keyboard ~=0.13.5

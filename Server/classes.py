@@ -70,7 +70,8 @@ class Table(threading.Thread):
 
         if DEBUG: print("Shuffling deck")
 
-        if self.player_count == 6:
+
+        if self.player_count < 7:
             while len(deck) < 30:
                 if len(deck) < 9:
                     deck.append("Ace")
@@ -120,7 +121,7 @@ class Table(threading.Thread):
         old_len = 0
         last_votes = 0
 
-        while len(self.players) < 6 or votes < len(self.players):
+        while 6 > len(self.players) != votes:
             try:
                 votes = 0
                 changes = False
