@@ -101,13 +101,7 @@ class Main(ur.Entity):
             #shader=lit_with_shadows_shader
             )
         
-        # floor = ur.Entity(model='plane', 
-        #                 scale=(100, 1, 100), 
-        #                 color=ur.color.white.tint(-0.2), 
-        #                 texture='white_cube', 
-        #                 texture_scale=(100, 100), 
-        #                 collider='box'
-        #                 )
+
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
@@ -159,7 +153,7 @@ class Main(ur.Entity):
             self.network.disconnect()
             exit()
             
-        if key == "f3":
+        if key == "f3" or key == "3":
             '''
             ready up
             '''
@@ -201,11 +195,11 @@ class Main(ur.Entity):
             print()
             self.player = Player(self.positions, uid)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
-            self.positions[uid][2] = self.player.chair  
+            self.positions[uid][2] = self.player 
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
-        self.positions[uid][2] = self.opponent.chair  
+        self.positions[uid][2] = self.opponent
         
     def wait(self): 
         while True:
@@ -213,12 +207,13 @@ class Main(ur.Entity):
             self.ui.count = 0
             if dic == "first":
                 self.ui.wp.disable()
-                print("first"*5)
                 self.game_start(True)
+                break
             elif dic == "sleep":
                 self.ui.wp.disable()
                 print("sleep"*5)
                 self.game_start(False)
+                break
             else:
                 for i in dic:
                     if i != "":
@@ -234,33 +229,16 @@ class Main(ur.Entity):
         for seating in self.positions.values():
             if seating[2] == "not used":
                 continue
-            print(seating[2])
-            self.spawn_cards(cards, seating[2])
-        while self.network.recv() != "now" and not state:
-            pass
+            seating[2].spawn_cards(cards)
+        print(state)
+        if not state:
+            while self.network.recv() != "now":
+                print("waiting for now")
+                pass
+
+            
         print(cards)
-        
-    def spawn_cards(self, cards, master):
-        '''
-        spawn the cards on the table
-        '''
-        center_pos = (0, 0.9, 0)
-        radius = 0.8
-        start_angle = -30
-        for i, card_data in enumerate(cards):
-            angle = start_angle + i * (60 / max(1, (len(cards) - 1)))
-            rad = math.radians(angle)
-            x = center_pos[0] + radius * math.cos(rad)
-            z = center_pos[2] + radius * math.sin(rad)
-            card = ur.Entity(
-                parent=master,
-                model="cube",
-                position=(x, center_pos[1], z),
-                rotation=(0, -angle, 0),
-                scale=(0.001, 0.2, 0.1),
-                color=ur.color.white.tint(-0.2),
-                shader=lit_with_shadows_shader
-            )
+        self.player.pick_cards()
 
     
     '''
