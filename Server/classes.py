@@ -206,6 +206,7 @@ class Player(threading.Thread):
         self.now = threading.Condition()
         self.cards_set = self.table.cards_set
         self.reshuffle = threading.Event()
+        self.sub_thread = None
 
     def run(self):
         """
@@ -250,7 +251,8 @@ class Player(threading.Thread):
             send_message_to_player(self, self.table.current_player.to_bytes(4, "big"))
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
-        subthread = threading.Thread(target=self.shuffle_handler)
+        self.subthread = threading.Thread(target=self.shuffle_handler)
+        self.subthread.start()
 
         while True:
             self.now.wait()
