@@ -36,7 +36,7 @@ class Main(ur.Entity):
         
         self.player_ready = False
         self.positions = {
-            0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used"],
+            0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
             1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
             2: [(1.75, 0.9, 3.031), (0, 210, 0), "not used"],
             3: [(-1.75, 0.9, 3.031), (0, 150, 0), "not used"],
@@ -201,10 +201,11 @@ class Main(ur.Entity):
             print()
             self.player = Player(self.positions, uid)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+            self.positions[uid][2] = self.player.chair  
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
-        self.positions[uid][2] = "used"  
+        self.positions[uid][2] = self.opponent.chair  
         
     def wait(self): 
         while True:
@@ -224,14 +225,18 @@ class Main(ur.Entity):
                         uid, name, skin, ready = i[0], i[1], i[2], i[3]
                         uid = int(uid)
                         self.ui.count += 1 if ready == "True" else 0
-                        if uid != self.uid and self.positions[uid][2] != "used":
+                        if uid != self.uid and self.positions[uid][2] == "not used":
                             self.spawn_people((uid, name, skin))
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self, state):
         cards = self.network.recv_cards()
-        self.spawn_cards(cards, self.player.chair)
-        while self.network.recv() != "now":
+        for seating in self.positions.values():
+            if seating[2] == "not used":
+                continue
+            print(seating[2])
+            self.spawn_cards(cards, seating[2])
+        while self.network.recv() != "now" and not state:
             pass
         print(cards)
         
@@ -239,19 +244,23 @@ class Main(ur.Entity):
         '''
         spawn the cards on the table
         '''
-        pos = (0.1, 0.9, 0)  # Bottom-left fixpoint
-        angle = 0
-        for i in cards:
+        center_pos = (0, 0.9, 0)
+        radius = 0.8
+        start_angle = -30
+        for i, card_data in enumerate(cards):
+            angle = start_angle + i * (60 / max(1, (len(cards) - 1)))
+            rad = math.radians(angle)
+            x = center_pos[0] + radius * math.cos(rad)
+            z = center_pos[2] + radius * math.sin(rad)
             card = ur.Entity(
                 parent=master,
                 model="cube",
-                position=pos,
+                position=(x, center_pos[1], z),
+                rotation=(0, -angle, 0),
                 scale=(0.001, 0.2, 0.1),
-                rotation=(0, angle, 0),
                 color=ur.color.white.tint(-0.2),
                 shader=lit_with_shadows_shader
             )
-            angle += 20
 
     
     '''
