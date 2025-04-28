@@ -49,7 +49,8 @@ class Table(threading.Thread):
             "alive": True,
             "voted": False,
             "cards": [],
-            "gun": [False, False, False, False, False, True]
+            "gun": [False, False, False, False, False, True],
+            "obj": None
         }
         self.player_count += 1
         if DEBUG: print(f"Player {uid} added to table")
@@ -118,25 +119,33 @@ class Table(threading.Thread):
 
 
         while len(self.players) < 6 or votes < len(self.players):
-            votes = 0
-            changes = False
+            try:
+                votes = 0
+                changes = False
 
-            if old_len != len(self.players):
-                old_len = len(self.players)
-                changes = True
+                if old_len != len(self.players):
+                    old_len = len(self.players)
+                    changes = True
 
 
-            for uid in self.players:
-                if self.players[uid]["voted"]:
-                    votes += 1
-
-            if votes != last_votes:
-                changes = True
-                last_votes = votes
-
-            if changes:
                 for uid in self.players:
-                    self.players[uid]["obj"].data_dump()
+                    if self.players[uid]["voted"]:
+                        votes += 1
+
+                if votes != last_votes:
+                    changes = True
+                    last_votes = votes
+
+                if changes:
+                    for uid in self.players:
+                        if self.players[uid]["obj"] is not None:
+                            if DEBUG: print(f"Sending update data to player {uid}")
+                            self.players[uid]["obj"].data_dump()
+
+            except RuntimeError as e:
+                if DEBUG: print("RuntimeError in pregame loop :", e)
+                pass
+
 
 
 
@@ -206,10 +215,12 @@ class Player(threading.Thread):
         self.data_dump()
         if DEBUG: print(f"Informed Player {self.uid}")
 
+        self.table.players[self.uid]["ready"] = True
+
         if DEBUG: print(f"Waiting for game to start")
 
         while not self.table.start_event.is_set():
-            self.sub_thread=threading.Thread(target=self.table.start_event.wait)
+            self.sub_thread=threading.Thread(target=self.vote_handler)
             self.sub_thread.start()
 
             self.table.start_event.wait()

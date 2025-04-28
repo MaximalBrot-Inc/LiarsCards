@@ -13,16 +13,23 @@ def connection_closed_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
+        except (ConnectionResetError, ConnectionAbortedError, ConnectionError, BrokenPipeError, OSError):
             print("Connection closed")
-            if "table" in kwargs:
-                table = kwargs["table"]
-            elif "player" in kwargs:
-                table = kwargs["player"].table
-            if "uid" in kwargs:
-                uid = kwargs["uid"]
-            elif "player" in kwargs:
-                uid = kwargs["player"].uid
+            for arg in args:
+                print(arg)
+                if hasattr(arg, "table"):
+                    print(f"Player {arg} has disconnected")
+                    table= arg.table
+                    uid = arg.uid
+                    break
+                elif hasattr(arg, "players"):
+                    print(f"Table {arg} has disconnected")
+                    table = arg
+                    uid = kwargs.get("uid", None)
+                    if uid is None:
+                        print("No UID provided for player removal.")
+                        return
+                    break
             remove_player_from_table(table, uid)
             exit()
 
@@ -84,9 +91,9 @@ def disconnect(player):
     :param  player: player instance
     :return: None
     """
-    player["conn"].close()
-    remove_player_from_table(player["table"], player["uid"])
-    player["alive"] = False
+    player.connection.close()
+    remove_player_from_table(player.table, player.uid)
+    player.alive = False
 
 
 def remove_player_from_table(table, uid):
