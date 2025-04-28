@@ -213,9 +213,11 @@ class Main(ur.Entity):
             if dic == "first":
                 self.ui.wp.disable()
                 print("first"*5)
+                self.game_start(True)
             elif dic == "sleep":
                 self.ui.wp.disable()
                 print("sleep"*5)
+                self.game_start(False)
             else:
                 for i in dic:
                     if i != "":
@@ -226,10 +228,31 @@ class Main(ur.Entity):
                             self.spawn_people((uid, name, skin))
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
-    def game_start(self):
-        cards = self.network.recv()
+    def game_start(self, state):
+        cards = self.network.recv_cards()
+        self.spawn_cards(cards, self.player.chair)
+        while self.network.recv() != "now":
+            pass
+        print(cards)
         
-        
+    def spawn_cards(self, cards, master):
+        '''
+        spawn the cards on the table
+        '''
+        pos = (0.1, 0.9, 0)  # Bottom-left fixpoint
+        angle = 0
+        for i in cards:
+            card = ur.Entity(
+                parent=master,
+                model="cube",
+                position=pos,
+                scale=(0.001, 0.2, 0.1),
+                rotation=(0, angle, 0),
+                color=ur.color.white.tint(-0.2),
+                shader=lit_with_shadows_shader
+            )
+            angle += 20
+
     
     '''
     send indexes of cards picked by player 
