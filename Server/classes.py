@@ -120,7 +120,7 @@ class Table(threading.Thread):
         old_len = 0
         last_votes = 0
 
-        while len(self.players) < 6 or votes < len(self.players):
+        while len(self.players) < 6 or votes == len(self.players)-1:
             try:
                 votes = 0
                 changes = False
