@@ -248,7 +248,7 @@ class Player(threading.Thread):
             self.table.increment_player()
 
         else:
-            send_message_to_player(self, self.table.current_player.to_bytes(4, "big"))
+            send_message_to_player(self, "sleep")
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
         self.subthread = threading.Thread(target=self.shuffle_handler)
