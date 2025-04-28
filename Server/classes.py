@@ -57,7 +57,7 @@ class Table(threading.Thread):
         return uid
 
     def add_player_object(self, player):
-        self.players[player["uid"]]["obj"] = player
+        self.players[player.uid]["obj"] = player
 
     def shuffle_deck(self):
         """
@@ -84,8 +84,8 @@ class Table(threading.Thread):
         random.shuffle(deck)
         self.card_of_round = random.choice(["Ace", "Queen", "King"])
 
-        for player in self.players:
-            self.players[player]["cards"] = deck[:5]
+        for uid in self.players:
+            self.players[uid]["cards"] = deck[:5]
             deck = deck[5:]
 
         #shuffle_done_event.set()
@@ -150,8 +150,8 @@ class Table(threading.Thread):
 
         self.players[self.current_player]["obj"].first=True
 
-        for player in self.players:
-            player.game_loop()
+        for uid in self.players:
+            self.players[uid]["obj"].game_loop()
         #while self.game_started:
 
         while self.game_started:
