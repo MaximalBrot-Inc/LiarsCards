@@ -49,7 +49,9 @@ class Network(socket.socket):
         
         a = []
         for i in dic.split(";"):
-            a.append(tuple(map(int, i.split(","))))
+            i[0] = int(i[0])
+            a.append(tuple(i.split(",")))
+        a.pop(-1)
         print(a)
         return a
     

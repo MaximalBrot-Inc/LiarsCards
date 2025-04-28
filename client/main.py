@@ -25,7 +25,7 @@ if os.path.exists(models_compressed_path):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
   
-debug = False
+debug = True
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -69,8 +69,8 @@ class Main(ur.Entity):
             skin = input("Enter your skin: ")
             return server, int(port), name + skin
         else:
-            return "127.0.0.1", 8000, "Play with my balls,skin2"
-            return "10.5.5.58", 8000, "Play with my balls,skin2"
+            return "127.0.0.1", 8000, "Player1,skin2"
+            return "10.5.5.58", 8000, "Player1,skin2"
             
     def threed(self):
         '''
@@ -132,8 +132,7 @@ class Main(ur.Entity):
         self.app.icon = "textures/Leserunde.ico"
         for i in self.lst:
             self.spawn_people(i)
-        #th.Thread(target=self.wait, daemon=True).start()
-        self.player.dead()
+        th.Thread(target=self.wait, daemon=True).start()
         
     def is_ready(self):
         if self.player_ready:
