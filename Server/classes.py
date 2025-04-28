@@ -135,8 +135,8 @@ class Table(threading.Thread):
                 last_votes = votes
 
             if changes:
-                for player in self.players:
-                    player.data_dump()
+                for uid in self.players:
+                    self.players[uid]["obj"].data_dump()
 
 
 
