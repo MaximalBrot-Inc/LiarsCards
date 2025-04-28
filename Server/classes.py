@@ -136,7 +136,7 @@ class Table(threading.Thread):
 
             if changes:
                 for player in self.players:
-                    player.data_dump()
+                    player["obj"].data_dump()
 
 
 
