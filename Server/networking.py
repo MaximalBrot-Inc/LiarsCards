@@ -69,7 +69,9 @@ def send_message_to_player(player, message):
     :param message: Message to send
     :return: None
     """
-    player.connection.sendall(message.encode())
+    if type(message) != bytes:
+        message = message.encode()
+    player.connection.sendall(message)
 
 
 @connection_closed_handler
