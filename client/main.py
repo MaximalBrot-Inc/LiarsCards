@@ -36,12 +36,12 @@ class Main(ur.Entity):
         
         self.player_ready = False
         self.positions = {
-            0: [(3.5, 0.9, 0.0), (0, -90, 0)],
-            1: [(-3.5, 0.9, 0.0), (0, 90, 0)],
-            2: [(1.75, 0.9, 3.031), (0, 210, 0)],
-            3: [(-1.75, 0.9, 3.031), (0, 150, 0)],
-            4: [(-1.75, 0.9, -3.031), (0, 30, 0)],
-            5: [(1.75, 0.9, -3.031), (0, 330, 0)]
+            0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used"],
+            1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
+            2: [(1.75, 0.9, 3.031), (0, 210, 0), "not used"],
+            3: [(-1.75, 0.9, 3.031), (0, 150, 0), "not used"],
+            4: [(-1.75, 0.9, -3.031), (0, 30, 0), "not used"],
+            5: [(1.75, 0.9, -3.031), (0, 330, 0), "not used"]
         }
 
         
@@ -134,7 +134,7 @@ class Main(ur.Entity):
         for i in self.lst:
             self.spawn_people(i)
         th.Thread(target=self.wait, daemon=True).start()
-        ur.invoke(kb.press_and_release, "alt+tab", delay=0.5)
+        #ur.invoke(kb.press_and_release, "alt+tab", delay=0.5)
         
         
     def is_ready(self):
@@ -148,7 +148,7 @@ class Main(ur.Entity):
             self.ui.count += 1
             self.player_ready = True
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
-        #self.network.send(self.player_ready)
+        self.network.send(str(self.player_ready))
     
             
     def input(self, key):
@@ -198,26 +198,33 @@ class Main(ur.Entity):
         self.ui.max_player += 1
         uid = int(uid)
         if uid == self.uid:
+            print()
             self.player = Player(self.positions, uid)
+            self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
-        self.positions[uid].append(self.opponent)  
+        self.positions[uid][2] = "used"  
         
     def wait(self): 
-        dic = self.network.pre_game()
-        if dic == "first":
-            self.ui.wp.disable()
-        elif dic == "sleep":
-            self.ui.wp.disable()
-        else:
-            for i in dic:
-                if i != "":
-                    uid, name, skin = i.split(",")
-                    uid = int(uid)
-                    if uid != self.uid:
-                        self.spawn_people((uid, name, skin))
-                        self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+        while True:
+            dic = self.network.pre_game()
+            self.ui.count = 0
+            if dic == "first":
+                self.ui.wp.disable()
+                print("first"*5)
+            elif dic == "sleep":
+                self.ui.wp.disable()
+                print("sleep"*5)
+            else:
+                for i in dic:
+                    if i != "":
+                        uid, name, skin, ready = i[0], i[1], i[2], i[3]
+                        uid = int(uid)
+                        self.ui.count += 1 if ready == "True" else 0
+                        if uid != self.uid and self.positions[uid][2] != "used":
+                            self.spawn_people((uid, name, skin))
+                self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self):
         cards = self.network.recv()
