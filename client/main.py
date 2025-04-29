@@ -6,7 +6,7 @@ import os
 import time
 import threading as th
 import ursina as ur  
-from ursina.shaders import lit_with_shadows_shader
+from ursina.shaders import lit_with_shadows_shader, basic_lighting_shader
 import shutil  # Add this import
 import math
 import keyboard as kb
@@ -50,6 +50,8 @@ class Main(ur.Entity):
         create the window
         '''
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        Dl = ur.DirectionalLight()
+        Dl.disable() # disables the Directional light
         width, height = ur.window.size
         
         gcd = math.gcd(int(width), int(height))
@@ -105,18 +107,35 @@ class Main(ur.Entity):
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
-                        shader=lit_with_shadows_shader,
+                        #shader=lit_with_shadows_shader,
                         ) 
         
         god = ur.Entity(model='hatsune_miku',  
                         scale=200,
                         color=ur.color.white.tint(-0.2), 
-                        collider='box', 
                         position=(0, 300, -300), 
                         rotation=(-90, -180, 0), 
-                        shader=lit_with_shadows_shader
+                        #shader=lit_with_shadows_shader
                         )
         
+        lamp = ur.Entity(model='Lamp.glb',
+                        color=ur.color.light_gray,
+                        position=(0, 3, 0),
+                        scale=2,
+                        #shader=lit_with_shadows_shader
+                        )
+        #lamp_verankerung = ur.Entity(model=)
+        lamp_light = ur.PointLight(parent=lamp, shadows=True, color=ur.color.white.tint(-0.7))
+        lamp_light.look_at(ur.Vec3(0, -1, 0))
+        lamp_light = ur.PointLight(parent=lamp, shadows=True, color=ur.color.brown.tint(-0.6))
+        lamp_light.look_at(ur.Vec3(0, -1, 0))
+        #ent = ur.Entity(parent=lamp, model="cube", position=(0, -1, 0))
+        
+
+
+        
+        #ambient_light = ur.AmbientLight(color=ur.color.orange, intensity=1)
+
         
         self.ui = UI(ur.camera.ui)
         x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
@@ -165,7 +184,7 @@ class Main(ur.Entity):
         if key == "right arrow":
             self.player.select_cards(+1)
         
-        if key == "enter":
+        if key == "enter" or key == "space":
             '''
             pick card
             '''

@@ -104,12 +104,31 @@ class Player(FirstPersonController):
         '''
         handle the logic for picking cards
         '''
+        if hasattr(self, 'mover') and self.mover:
+            ur.destroy(self.mover)
         if self.cards[self.card_selected][2] == "not locked":
             self.cards[self.card_selected][0].color = ur.color.green.tint(-0.2)
             self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "locked")
+            self.card_to_move = self.cards[self.card_selected][0]
+            self.pos_to_achieve = 0.95
+            self.condition = self.pos_to_achieve - self.card_to_move.y
         else:
             self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
             self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "not locked")
+            self.card_to_move = self.cards[self.card_selected][0]
+            self.pos_to_achieve = 0.9
+            self.condition = self.card_to_move.y - self.pos_to_achieve
+        self.mover = ur.Entity(update=self.move_card)
+            #self.cards[self.card_selected][0].y = 0.9
+            
+        
+    def move_card(self):
+        self.card_to_move.y = ur.lerp(self.card_to_move.y, self.pos_to_achieve, 4 * ur.time.dt)
+        if (self.condition) < 0.01:
+            print(self.condition)
+            ur.destroy(self.mover)
+            self.mover = None
+            return
 
 
 
