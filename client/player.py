@@ -4,7 +4,7 @@ create a player class that will create the player
 import ursina as ur 
 from ursina.prefabs.first_person_controller import FirstPersonController
 from gun import Gun
-from ursina.shaders import lit_with_shadows_shader
+from ursina.shaders import lit_with_shadows_shader, unlit_shader
 import math
 
 
@@ -72,7 +72,7 @@ class Player(FirstPersonController):
                 rotation=(0, -angle, 0),
                 scale=(0.001, 0.2, 0.1),
                 color=ur.color.white.tint(-0.2),
-                shader=lit_with_shadows_shader
+                shader=unlit_shader
             )
             self.cards.append((card, card_data, "not locked"))
         self.cards.reverse()
@@ -97,7 +97,7 @@ class Player(FirstPersonController):
         
         for i in self.cards:
             if i[2] == "locked" and i[0] != self.cards[self.card_selected][0]:
-                i[0].color = ur.color.green.tint(-0.5)
+                i[0].color = ur.color.green.tint(-0.7)
         print("selected card: ", self.card_selected)
         
     def pick_card(self)  :
@@ -129,6 +129,8 @@ class Player(FirstPersonController):
             ur.destroy(self.mover)
             self.mover = None
             return
+    
+    
 
 
 

@@ -24,7 +24,10 @@ class Network(socket.socket):
         '''
         send data to the server
         '''
-        self.s.sendall(data.encode())
+        try:
+            self.s.sendall(data.encode())
+        except AttributeError:
+            pickle_data = pickle.dumps(data)
 
     def receive_first(self):
         '''

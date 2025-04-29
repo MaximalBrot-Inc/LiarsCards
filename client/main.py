@@ -6,7 +6,7 @@ import os
 import time
 import threading as th
 import ursina as ur  
-from ursina.shaders import lit_with_shadows_shader, basic_lighting_shader
+from ursina.shaders import lit_with_shadows_shader, basic_lighting_shader, normals_shader, unlit_shader, colored_lights_shader
 import shutil  # Add this import
 import math
 import keyboard as kb
@@ -50,8 +50,11 @@ class Main(ur.Entity):
         create the window
         '''
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
-        Dl = ur.DirectionalLight()
-        Dl.disable() # disables the Directional light
+
+        ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
+        ur.light.look_at(ur.Vec3(0, -1, 0))        
+       
+        
         width, height = ur.window.size
         
         gcd = math.gcd(int(width), int(height))
@@ -97,7 +100,7 @@ class Main(ur.Entity):
         #sky = ur.Sky()
         self.uid = int(self.uid)
         self.table = ur.Entity(
-            model="table",
+            model="table.glb",
             position=(0, 0, 0),
             scale=(1.75, 1.5, 1.75),
             #shader=lit_with_shadows_shader
@@ -107,7 +110,8 @@ class Main(ur.Entity):
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
-                        #shader=lit_with_shadows_shader,
+                        #shader=unlit_shader,
+                        
                         ) 
         
         god = ur.Entity(model='hatsune_miku',  
@@ -125,17 +129,14 @@ class Main(ur.Entity):
                         #shader=lit_with_shadows_shader
                         )
         #lamp_verankerung = ur.Entity(model=)
-        lamp_light = ur.PointLight(parent=lamp, shadows=True, color=ur.color.white.tint(-0.7))
+        
+        
+        lamp_light = ur.PointLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
-        lamp_light = ur.PointLight(parent=lamp, shadows=True, color=ur.color.brown.tint(-0.6))
+        lamp_light = ur.PointLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
         #ent = ur.Entity(parent=lamp, model="cube", position=(0, -1, 0))
         
-
-
-        
-        #ambient_light = ur.AmbientLight(color=ur.color.orange, intensity=1)
-
         
         self.ui = UI(ur.camera.ui)
         x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
@@ -189,6 +190,12 @@ class Main(ur.Entity):
             pick card
             '''
             self.player.pick_card()
+        
+        if key == "e":
+            '''
+            throw cards
+            '''
+            self.throw_cards()
             
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
@@ -267,9 +274,22 @@ class Main(ur.Entity):
                 print("waiting for now")
                 pass
 
-            
         print(cards)
         self.player.select_cards(0)
+    
+    def throw_cards(self):
+        '''
+        throw cards on the table
+        '''
+        picked_cards = []
+        for i in self.player.cards:
+            if i[2] == "locked":
+                picked_cards.append(i)
+        print(picked_cards)
+        self.network.send(picked_cards)
+    
+    
+    
 
     
     '''
