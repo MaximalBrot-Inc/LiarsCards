@@ -6,7 +6,10 @@ from operator import invert
 
 from networking import *
 
+send_delay = 0.1
+
 DEBUG = True
+
 
 
 class Table(threading.Thread):
@@ -31,7 +34,7 @@ class Table(threading.Thread):
         self.pregame_loop()
 
         self.game_started = True
-        self.start_event.set()
+
         self.game_loop()
 
     def add_player(self, name, skin, conn):
@@ -159,8 +162,7 @@ class Table(threading.Thread):
 
         self.players[self.current_player]["obj"].first = True
 
-        for uid in self.players:
-            self.players[uid]["obj"].game_loop()
+        self.start_event.set()
         #while self.game_started:
 
         while self.game_started and alive_players >= 1:
@@ -233,6 +235,8 @@ class Player(threading.Thread):
 
             self.table.start_event.wait()
 
+        self.game_loop()
+
     def game_loop(self):
         """
         Game loop
@@ -241,7 +245,7 @@ class Player(threading.Thread):
 
         if self.first:
             send_message_to_player(self, "first")
-            time.sleep(0.01)
+            time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
             self.cards_set = receive_message(self).split(",")
             self.cards_set.sort(invert)
@@ -252,7 +256,7 @@ class Player(threading.Thread):
 
         else:
             send_message_to_player(self, "sleep")
-            time.sleep(0.01)
+            time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
 
         self.subthread = threading.Thread(target=self.shuffle_handler)
