@@ -91,16 +91,25 @@ class Player(FirstPersonController):
                 i[0].color = ur.color.white.tint(-0.2)
         
         if self.cards[self.card_selected][2] == "not locked":
-            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.1)
+            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
+        else:
+            self.cards[self.card_selected][0].color = ur.color.green.tint(-0.1)
         
+        for i in self.cards:
+            if i[2] == "locked" and i[0] != self.cards[self.card_selected][0]:
+                i[0].color = ur.color.green.tint(-0.5)
         print("selected card: ", self.card_selected)
         
     def pick_card(self)  :
         '''
         handle the logic for picking cards
         '''
-        self.cards[self.card_selected][0].color = ur.color.green.tint(-0.2)
-        self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "locked")
+        if self.cards[self.card_selected][2] == "not locked":
+            self.cards[self.card_selected][0].color = ur.color.green.tint(-0.2)
+            self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "locked")
+        else:
+            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
+            self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "not locked")
 
 
 
