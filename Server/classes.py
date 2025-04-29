@@ -156,6 +156,7 @@ class Table(threading.Thread):
         """
         Game loop
         """
+        last_player = 0
 
         self.shuffle_deck()
         alive_players = self.player_count
@@ -171,9 +172,17 @@ class Table(threading.Thread):
                 if not self.players[uid]["alive"]:
                     alive_players -= 1
 
+            if self.current_player != last_player:
+                self.players[self.current_player]["obj"].now.set()
+                #flood_players(f"turn,{self.current_player}", self)
+                if DEBUG: print(f"Player {self.current_player} turn")
+                self.players[self.current_player]["obj"].now.clear()
+
             if self.liar_event.is_set():
                 self.liar_event.clear()
                 self.liar_handler()
+
+            last_player = self.current_player
 
     def liar_handler(self):
         """
@@ -207,7 +216,7 @@ class Player(threading.Thread):
         self.cards = self.table.players[self.uid]["cards"]
         self.gun = self.table.players[self.uid]["gun"]
         self.first = False
-        self.now = threading.Condition()
+        self.now = threading.Event()
         self.cards_set = self.table.cards_set
         self.reshuffle = threading.Event()
         self.sub_thread = None
@@ -229,11 +238,13 @@ class Player(threading.Thread):
 
         if DEBUG: print(f"Waiting for game to start")
 
-        while not self.table.start_event.is_set():
+        if not self.table.start_event.is_set():
             self.sub_thread = threading.Thread(target=self.vote_handler)
             self.sub_thread.start()
 
             self.table.start_event.wait()
+
+        #self.sub_thread = None
 
         self.game_loop()
 
@@ -263,6 +274,7 @@ class Player(threading.Thread):
         self.subthread.start()
 
         while True:
+            if DEBUG: print(f"Waiting for player {self.uid} to send cards")
             self.now.wait()
             send_message_to_player(self, "now")
             return_data = receive_message(self)
