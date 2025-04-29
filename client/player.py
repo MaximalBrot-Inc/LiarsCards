@@ -74,20 +74,33 @@ class Player(FirstPersonController):
                 color=ur.color.white.tint(-0.2),
                 shader=lit_with_shadows_shader
             )
-            self.cards.append((card, card_data))
+            self.cards.append((card, card_data, "not locked"))
+        self.cards.reverse()
     
-    def select_cards(self):
+    def select_cards(self, dir):
         '''
         handle the logic for selecting a card
         '''
+        self.card_selected += dir
+        if self.card_selected < 0:
+            self.card_selected = len(self.cards) - 1
+        elif self.card_selected == len(self.cards):
+            self.card_selected = 0
+        for i in self.cards:
+            if i[2] == "not locked":
+                i[0].color = ur.color.white.tint(-0.2)
         
-        print(self.cards)
+        if self.cards[self.card_selected][2] == "not locked":
+            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.1)
+        
+        print("selected card: ", self.card_selected)
         
     def pick_card(self)  :
         '''
         handle the logic for picking cards
         '''
-
+        self.cards[self.card_selected][0].color = ur.color.green.tint(-0.2)
+        self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "locked")
 
 
 

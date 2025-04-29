@@ -158,6 +158,19 @@ class Main(ur.Entity):
             ready up
             '''
             self.is_ready()
+        
+        if key == "left arrow":
+            self.player.select_cards(-1)
+        
+        if key == "right arrow":
+            self.player.select_cards(+1)
+        
+        if key == "enter":
+            '''
+            pick card
+            '''
+            self.player.pick_card()
+            
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
             #self.network.send(True)
@@ -211,7 +224,6 @@ class Main(ur.Entity):
                 break
             elif dic == "sleep":
                 self.ui.wp.disable()
-                print("sleep"*5)
                 self.game_start(False)
                 break
             else:
@@ -238,7 +250,7 @@ class Main(ur.Entity):
 
             
         print(cards)
-        self.player.pick_cards()
+        self.player.select_cards(0)
 
     
     '''

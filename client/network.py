@@ -47,7 +47,7 @@ class Network(socket.socket):
         print(dic)
         dic = dic.decode()
         print("pre_game")
-        if len(dic) == 1 or dic == "first":
+        if dic == "sleep" or dic == "first":
             return dic
 
         a = []
