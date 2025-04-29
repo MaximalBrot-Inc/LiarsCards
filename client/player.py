@@ -4,6 +4,9 @@ create a player class that will create the player
 import ursina as ur 
 from ursina.prefabs.first_person_controller import FirstPersonController
 from gun import Gun
+from ursina.shaders import lit_with_shadows_shader
+import math
+
 
 
 class Player(FirstPersonController):
@@ -19,6 +22,9 @@ class Player(FirstPersonController):
         self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5)
         self.gun = Gun(self.chair, self.gun_pos, self.gun_rot, pos, self)
         self.gravity = 0
+        self.cards = []
+        self.picked_cards = []
+        self.card_selected = 0
     
     def disable_movement(self):
         self.speed = 0
@@ -49,6 +55,39 @@ class Player(FirstPersonController):
             font="VeraMono.ttf",
         )
         ur.invoke(self.dead, delay=4)
+    
+    def spawn_cards(self, cards):
+        center_pos = (0, 0.9, 0)
+        radius = 0.8
+        start_angle = -30
+        for i, card_data in enumerate(cards):
+            angle = start_angle + i * (60 / max(1, (len(cards) - 1)))
+            rad = math.radians(angle)
+            x = center_pos[0] + radius * math.cos(rad)
+            z = center_pos[2] + radius * math.sin(rad)
+            card = ur.Entity(
+                parent=self.chair,
+                model="cube",
+                position=(x, center_pos[1], z),
+                rotation=(0, -angle, 0),
+                scale=(0.001, 0.2, 0.1),
+                color=ur.color.white.tint(-0.2),
+                shader=lit_with_shadows_shader
+            )
+            self.cards.append((card, card_data))
+    
+    def select_cards(self):
+        '''
+        handle the logic for selecting a card
+        '''
+        
+        print(self.cards)
+        
+    def pick_card(self)  :
+        '''
+        handle the logic for picking cards
+        '''
+
 
 
 

@@ -36,7 +36,7 @@ class Main(ur.Entity):
         
         self.player_ready = False
         self.positions = {
-            0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used"],
+            0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
             1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
             2: [(1.75, 0.9, 3.031), (0, 210, 0), "not used"],
             3: [(-1.75, 0.9, 3.031), (0, 150, 0), "not used"],
@@ -101,13 +101,7 @@ class Main(ur.Entity):
             #shader=lit_with_shadows_shader
             )
         
-        # floor = ur.Entity(model='plane', 
-        #                 scale=(100, 1, 100), 
-        #                 color=ur.color.white.tint(-0.2), 
-        #                 texture='white_cube', 
-        #                 texture_scale=(100, 100), 
-        #                 collider='box'
-        #                 )
+
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
@@ -159,7 +153,7 @@ class Main(ur.Entity):
             self.network.disconnect()
             exit()
             
-        if key == "f3":
+        if key == "f3" or key == "3":
             '''
             ready up
             '''
@@ -201,10 +195,11 @@ class Main(ur.Entity):
             print()
             self.player = Player(self.positions, uid)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+            self.positions[uid][2] = self.player 
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
         self.opponent.name_tag.text = name 
-        self.positions[uid][2] = "used"  
+        self.positions[uid][2] = self.opponent
         
     def wait(self): 
         while True:
@@ -212,24 +207,39 @@ class Main(ur.Entity):
             self.ui.count = 0
             if dic == "first":
                 self.ui.wp.disable()
-                print("first"*5)
+                self.game_start(True)
+                break
             elif dic == "sleep":
                 self.ui.wp.disable()
                 print("sleep"*5)
+                self.game_start(False)
+                break
             else:
                 for i in dic:
                     if i != "":
                         uid, name, skin, ready = i[0], i[1], i[2], i[3]
                         uid = int(uid)
                         self.ui.count += 1 if ready == "True" else 0
-                        if uid != self.uid and self.positions[uid][2] != "used":
+                        if uid != self.uid and self.positions[uid][2] == "not used":
                             self.spawn_people((uid, name, skin))
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
-    def game_start(self):
-        cards = self.network.recv()
-        
-        
+    def game_start(self, state):
+        cards = self.network.recv_cards()
+        for seating in self.positions.values():
+            if seating[2] == "not used":
+                continue
+            seating[2].spawn_cards(cards)
+        print(state)
+        if not state:
+            while self.network.recv() != "now":
+                print("waiting for now")
+                pass
+
+            
+        print(cards)
+        self.player.pick_cards()
+
     
     '''
     send indexes of cards picked by player 

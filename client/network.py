@@ -2,6 +2,7 @@
 networking of the clients
 """
 import socket
+import pickle
 class Network(socket.socket):
     '''
     networking of the clients
@@ -42,7 +43,9 @@ class Network(socket.socket):
     def pre_game(self):
         print("pre_game")
         print("\n"*3)
-        dic = self.s.recv(2048).decode()
+        dic = self.s.recv(2048)
+        print(dic)
+        dic = dic.decode()
         print("pre_game")
         if len(dic) == 1 or dic == "first":
             return dic
@@ -63,6 +66,10 @@ class Network(socket.socket):
         if not data:
             return None
         return data
+    
+    def recv_cards(self):
+        
+        return pickle.loads(self.s.recv(2048))
 
     def disconnect(self):
         '''
