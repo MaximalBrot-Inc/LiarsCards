@@ -14,7 +14,7 @@ DEBUG = True
 
 class Table(threading.Thread):
     def __init__(self):
-        super().__init__()
+        super().__init__(daemon=True)
         self.players = {}
         self.card_of_round = None
         self.current_player = 0
@@ -125,8 +125,9 @@ class Table(threading.Thread):
         old_len = 0
         last_votes = 0
 
-        while 6 > len(self.players) != votes:
+        while 6 > len(self.players) > votes and not 1 < votes:
             try:
+                print(f"Pregame loop: {len(self.players)} players, {votes} votes")
                 votes = 0
                 changes = False
 
@@ -205,7 +206,7 @@ class Table(threading.Thread):
 
 class Player(threading.Thread):
     def __init__(self, connection, table, uid, name, skin):
-        super().__init__()
+        super().__init__(daemon=True)
         self.table = table
         self.uid = uid
         self.name = name
@@ -258,7 +259,10 @@ class Player(threading.Thread):
             send_message_to_player(self, "first")
             time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
-            self.cards_set = receive_message(self).split(",")
+            self.cards_set = receive_message(self)
+            if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+            else: disconnect(self); return
+
             self.cards_set.sort(invert)
             for card in self.cards_set:
                 self.cards.pop(card)
@@ -281,7 +285,10 @@ class Player(threading.Thread):
             if return_data == "liar":
                 self.table.liar_event.set()
             else:
-                self.cards_set = return_data.split(",")
+                self.cards_set = return_data
+                if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+                else: disconnect(self); return
+
                 flood_players(self.cards_set, self.table, self.uid)
                 self.table.increment_player()
 
