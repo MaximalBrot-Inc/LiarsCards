@@ -208,6 +208,13 @@ class Table(threading.Thread):
         If the player is not caught lying, the player who called liar has to use their gun.
         :return :None
         """
+        if DEBUG: print("Liar handler called")
+        data = []
+        for card in self.cards_set:
+            data.append(self.players[self.current_player]["obj"].cards[card])
+
+        flood_players(f"[{pickle.dumps(data)}]", self)
+
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
@@ -292,6 +299,8 @@ class Player(threading.Thread):
             send_message_to_player(self, "first")
             time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            time.sleep(send_delay)
+            send_message_to_player(self, f"{self.table.card_of_round}")
             self.cards_set = receive_message(self)
             if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
             else: disconnect(self); return
@@ -306,6 +315,8 @@ class Player(threading.Thread):
             send_message_to_player(self, "sleep")
             time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            time.sleep(send_delay)
+            send_message_to_player(self, f"{self.table.card_of_round}")
 
         self.subthread = threading.Thread(target=self.shuffle_handler, daemon=True)
         self.subthread.start()
@@ -346,6 +357,8 @@ class Player(threading.Thread):
         self.reshuffle.wait()
         self.reshuffle.clear()
         send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+        time.sleep(send_delay)
+        send_message_to_player(self, f"{self.table.card_of_round}")
 
 
     def data_dump(self):

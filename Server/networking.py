@@ -3,6 +3,7 @@ Networking module for the game server.
 This module handles the communication between the server and the players.
 """
 import functools
+import pickle
 
 MSG_SIZE = 2048
 
@@ -87,13 +88,12 @@ def receive_message(player):
     :type player: class
     :return: Message received
     """
+    message = player.connection.recv(MSG_SIZE)
     try:
-        message = player.connection.recv(MSG_SIZE).decode()
-        return message
-    except (ConnectionResetError, ConnectionAbortedError, ConnectionError):
-        print("Connection closed")
-        disconnect(player)
-        return None
+        message = pickle.loads(message)
+    except pickle.UnpicklingError:
+        message= message.decode()
+    return message
 
 
 def disconnect(player):
