@@ -25,7 +25,8 @@ if os.path.exists(models_compressed_path):
     for i in range(10):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
-  
+    
+thread = th.Thread(target=os.system, args=("start cmd.exe && py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
 debug = True
 class Main(ur.Entity):
     def __init__(self):
@@ -131,10 +132,14 @@ class Main(ur.Entity):
         #lamp_verankerung = ur.Entity(model=)
         
         
-        lamp_light = ur.PointLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7))
+        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
-        lamp_light = ur.PointLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6))
+        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6), y=0.21, scale=(0.1, 0.1, 0.1))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
+        # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.yellow.tint(-0.95), y=0.21, scale=(0.1, 0.1, 0.1))
+        # lamp_light.look_at(ur.Vec3(0, -1, 0))
+        
+        
         #ent = ur.Entity(parent=lamp, model="cube", position=(0, -1, 0))
         
         
@@ -171,6 +176,7 @@ class Main(ur.Entity):
         '''
         if key == 'control':
             self.network.disconnect()
+            os.system("taskkill /F /IM python.exe")
             exit()
             
         if key == "f3" or key == "3":
