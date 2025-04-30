@@ -45,9 +45,12 @@ def flood_players(message, table, sender_uid=None):
     """
     Flood Players
     Send a message to all players
-    :param str message: Message to send
-    :param obj table: Server instance
-    :param int sender_uid: User ID of the sender
+    :param message: Message to send
+    :type message: str
+    :param table: Server instance
+    :type table: class
+    :param sender_uid: User ID of the sender
+    :type sender_uid: int
     :return: None
     """
     if sender_uid is not None:
@@ -66,7 +69,9 @@ def send_message_to_player(player, message):
     """
     Send a message to a specific player
     :param player: Player instance
+    :type player: class
     :param message: Message to send
+    :type message: str or bytes
     :return: None
     """
     if type(message) != bytes:
@@ -79,6 +84,7 @@ def receive_message(player):
     """
     Receive a message from a player
     :param  player: Player instance
+    :type player: class
     :return: Message received
     """
     try:
