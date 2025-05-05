@@ -276,6 +276,7 @@ class Main(ur.Entity):
             if seating[2] == "not used":
                 continue
             seating[2].spawn_cards(cards)
+        print(cards)
         print(state)
         self.state = False
         self.show_tablecard()
@@ -284,7 +285,7 @@ class Main(ur.Entity):
                 print("waiting for now")
                 pass
         self.state = True
-        print(cards)
+        
         
     
     def throw_cards(self):

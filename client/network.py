@@ -78,6 +78,7 @@ class Network(socket.socket):
 
         if not data:
             return None
+        print(data)
         return data
     
     def recv_cards(self):
