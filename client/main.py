@@ -250,13 +250,9 @@ class Main(ur.Entity):
         while True:
             dic = self.network.pre_game()
             self.ui.count = 0
-            if dic == "first":
+            if type(dic) == int:
                 self.ui.wp.disable()
-                self.game_start(True)
-                break
-            elif dic == "sleep":
-                self.ui.wp.disable()
-                self.game_start(False)
+                self.game_start(dic)
                 break
             else:
                 for i in dic:
@@ -268,8 +264,12 @@ class Main(ur.Entity):
                             self.spawn_people((uid, name, skin))
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
-    def game_start(self, state):
+    def game_start(self, dic):
         cards = self.network.recv_cards()
+        if dic == self.uid:
+            state = True
+        else:
+            state = False
         self.state = state
 
         for seating in self.positions.values():
@@ -281,9 +281,12 @@ class Main(ur.Entity):
         self.state = False
         self.show_tablecard()
         if not state:
-            while self.network.recv() != "now":
-                print("waiting for now")
-                pass
+            while  True:
+                self.recv = self.network.recv()
+                print("recv: ", self.recv)  
+                
+                # if self.recv == "now":
+                #     break
         self.state = True
         
         
@@ -298,6 +301,7 @@ class Main(ur.Entity):
                 picked_cards.append(self.player.cards.index(i))
         print(picked_cards)
         self.network.send(picked_cards)
+        self.state = False
     
     def show_tablecard(self):
         '''

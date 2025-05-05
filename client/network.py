@@ -36,6 +36,7 @@ class Network(socket.socket):
         receive data from the server
         '''
         uid = self.s.recv(2048).decode()
+        self.uid = uid
         print(uid)
         dic = self.s.recv(2048).decode()
         a = []
@@ -46,39 +47,33 @@ class Network(socket.socket):
         return uid, a
     
     def pre_game(self):
-        print("pre_game")
-        print("\n"*3)
         dic = self.s.recv(2048)
-        print(dic)
         dic = dic.decode()
-        print("pre_game")
-        if dic == "sleep" or dic == "first":
+        try:
+            dic = int(dic)
+            print("uid:", dic)
             return dic
-
-        a = []
-        for i in dic.split(";"):
-            print(i)
-            a.append(tuple(i.split(",")))
-        a.pop(-1)
-        print(a)
-        return a
+        except:
+            a = []
+            for i in dic.split(";"):
+                print(i)
+                a.append(tuple(i.split(",")))
+            a.pop(-1)
+            print("list:", a)
+            return a
     
     def recv(self):
         '''
         receive data from the server
         '''
         data = self.s.recv(2048)
-        
-        try: 
-            data = data.decode()
-        except UnicodeDecodeError: 
-            pass 
-        except:
+        try:
+            data = data.decode("utf-8")
+        except UnicodeDecodeError:
             data = pickle.loads(data)
 
         if not data:
             return None
-        print(data)
         return data
     
     def recv_cards(self):
