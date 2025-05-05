@@ -28,6 +28,7 @@ class Network(socket.socket):
             self.s.sendall(data.encode())
         except AttributeError:
             pickle_data = pickle.dumps(data)
+            self.s.sendall(pickle_data)
             print("sending pickle data")
 
     def receive_first(self):
