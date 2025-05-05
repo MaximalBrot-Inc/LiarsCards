@@ -144,7 +144,7 @@ class Table(threading.Thread):
         players = self.players.copy()
 
         while 6 > len(players) > votes and not 1 < votes:
-            print(f"Pregame loop: {len(players)} players, {votes} votes")
+            time.sleep(0.1)
             votes = 0
             changes = False
 
@@ -298,17 +298,15 @@ class Player(threading.Thread):
 
         if self.first:
             send_message_to_player(self, "first")
-            time.sleep(send_delay)
-            send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
-            time.sleep(send_delay)
-            send_message_to_player(self, f"{self.table.card_of_round}")
+            self.initial_cards()
+
             if DEBUG: print(f"Player {self.uid} is first")
             self.cards_set = receive_message(self)
             if DEBUG: print(f"Player {self.uid} sent cards")
             #if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
             #else: disconnect(self); return
 
-            self.cards_set.sort(invert)
+            self.cards_set.sort(reverse=True)
             for card in self.cards_set:
                 self.cards.pop(card)
             flood_players(f"{len(self.cards_set)}", self.table, self.uid)
@@ -316,10 +314,7 @@ class Player(threading.Thread):
 
         else:
             send_message_to_player(self, "sleep")
-            time.sleep(send_delay)
-            send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
-            time.sleep(send_delay)
-            send_message_to_player(self, f"{self.table.card_of_round}")
+            self.initial_cards()
 
         self.subthread = threading.Thread(target=self.shuffle_handler, daemon=True)
         self.subthread.start()
@@ -333,11 +328,23 @@ class Player(threading.Thread):
                 self.table.liar_event.set()
             else:
                 self.cards_set = return_data
-                if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+                if self.cards_set is not None: self.cards_set = self.cards_set
                 else: disconnect(self); return
 
                 flood_players(self.cards_set, self.table, self.uid)
                 self.table.increment_player()
+
+    def initial_cards(self):
+        """
+        Function to send the initial cards to the player.
+        :return: None
+        """
+        time.sleep(send_delay)
+        print(self.table.players[self.uid]["cards"])
+        print(self.table.card_of_round)
+        send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+        time.sleep(send_delay)
+        send_message_to_player(self, f"{self.table.card_of_round}")
 
     def vote_handler(self):
         """
@@ -378,14 +385,17 @@ class Player(threading.Thread):
         """
         Function to handle the gun logic. If the player is shot, the player is set to dead. This info is sent to all players.
         """
+        self.gun = self.table.players[self.uid]["gun"]
         random.shuffle(self.gun)
         if self.gun[0]:
             self.alive = False
             flood_players(f"gun,{self.uid},live", self.table, self.uid)
+            self.table.players[self.uid]["gun"] = self.gun
             return
         else:
             self.gun.pop(0)
             flood_players(f"gun,{self.uid},blank", self.table, self.uid)
+            self.table.players[self.uid]["gun"] = self.gun
             return
 
 
