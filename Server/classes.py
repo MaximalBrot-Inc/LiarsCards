@@ -14,7 +14,12 @@ DEBUG = True
 
 class Table(threading.Thread):
     def __init__(self):
-        super().__init__()
+        """"
+        Table class to handle the game logic and player management.
+        This class is a thread that runs the game loop and handles the player actions.
+        :return: None
+        """
+        super().__init__(daemon=True)
         self.players = {}
         self.card_of_round = None
         self.current_player = 0
@@ -28,7 +33,8 @@ class Table(threading.Thread):
 
     def run(self):
         """
-        Run the game loop
+        The main function of the table thread. This function is called when the table thread is started.
+        :return: None
         """
         if DEBUG: print("Table started")
         self.pregame_loop()
@@ -41,8 +47,11 @@ class Table(threading.Thread):
         """
         Add a player to the table
         :param name: Name of the player
+        :type name: str
         :param skin: Skin of the player
+        :type skin: str
         :param conn: Connection object of the player
+        :type conn: socket object
         """
         uid = self.generate_uid()
         if uid is None:
@@ -69,6 +78,7 @@ class Table(threading.Thread):
     def shuffle_deck(self):
         """
         Shuffle the deck
+        :return: None
         """
         deck = self.deck
 
@@ -102,6 +112,7 @@ class Table(threading.Thread):
     def increment_player(self):
         """
         Increment the player
+        :return: None
         """
         self.last_player = self.current_player
         self.current_player += 1
@@ -121,12 +132,18 @@ class Table(threading.Thread):
         return None
 
     def pregame_loop(self):
+        """
+        Function to handle the pregame loop. This function is called when the game starts.
+        It handles the voting process and the player count.
+        :return: None
+        """
         votes = 0
         old_len = 0
         last_votes = 0
 
-        while 6 > len(self.players) != votes:
+        while 6 > len(self.players) > votes and not 1 < votes:
             try:
+                print(f"Pregame loop: {len(self.players)} players, {votes} votes")
                 votes = 0
                 changes = False
 
@@ -154,7 +171,8 @@ class Table(threading.Thread):
 
     def game_loop(self):
         """
-        Game loop
+        Main game loop. This function is called when the game starts. It handles the game logic and player turns.
+        :return: None
         """
         last_player = 0
 
@@ -186,8 +204,17 @@ class Table(threading.Thread):
 
     def liar_handler(self):
         """
-        Liar Handler
+        Function to handle the liar logic. If a player is caught lying, they have to use their gun.
+        If the player is not caught lying, the player who called liar has to use their gun.
+        :return :None
         """
+        if DEBUG: print("Liar handler called")
+        data = []
+        for card in self.cards_set:
+            data.append(self.players[self.current_player]["obj"].cards[card])
+
+        flood_players(f"[{pickle.dumps(data)}]", self)
+
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
@@ -205,7 +232,19 @@ class Table(threading.Thread):
 
 class Player(threading.Thread):
     def __init__(self, connection, table, uid, name, skin):
-        super().__init__()
+        """
+        :param connection: Connection object of the player
+        :type connection:
+        :param table: Object of the table the player is sitting at
+        :type table:
+        :param uid: User ID of the player on the table
+        :type uid:
+        :param name: Name of the player
+        :type name:
+        :param skin: Skin of the player
+        :type skin:
+        """
+        super().__init__(daemon=True)
         self.table = table
         self.uid = uid
         self.name = name
@@ -223,7 +262,8 @@ class Player(threading.Thread):
 
     def run(self):
         """
-        Run the player thread
+        Function wich executes at the start of the player thread. Also contains the pregame loop.
+        :return: None
         """
         if DEBUG: print(f"Player {self.uid} started")
         self.table.add_player_object(self)
@@ -239,7 +279,7 @@ class Player(threading.Thread):
         if DEBUG: print(f"Waiting for game to start")
 
         if not self.table.start_event.is_set():
-            self.sub_thread = threading.Thread(target=self.vote_handler)
+            self.sub_thread = threading.Thread(target=self.vote_handler, daemon=True)
             self.sub_thread.start()
 
             self.table.start_event.wait()
@@ -250,7 +290,8 @@ class Player(threading.Thread):
 
     def game_loop(self):
         """
-        Game loop
+        Core game loop for the player thread
+        :return: None
         """
         if DEBUG: print(f"Game loop started for player {self.uid}")
 
@@ -258,7 +299,12 @@ class Player(threading.Thread):
             send_message_to_player(self, "first")
             time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
-            self.cards_set = receive_message(self).split(",")
+            time.sleep(send_delay)
+            send_message_to_player(self, f"{self.table.card_of_round}")
+            self.cards_set = receive_message(self)
+            if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+            else: disconnect(self); return
+
             self.cards_set.sort(invert)
             for card in self.cards_set:
                 self.cards.pop(card)
@@ -269,8 +315,10 @@ class Player(threading.Thread):
             send_message_to_player(self, "sleep")
             time.sleep(send_delay)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            time.sleep(send_delay)
+            send_message_to_player(self, f"{self.table.card_of_round}")
 
-        self.subthread = threading.Thread(target=self.shuffle_handler)
+        self.subthread = threading.Thread(target=self.shuffle_handler, daemon=True)
         self.subthread.start()
 
         while True:
@@ -281,13 +329,17 @@ class Player(threading.Thread):
             if return_data == "liar":
                 self.table.liar_event.set()
             else:
-                self.cards_set = return_data.split(",")
+                self.cards_set = return_data
+                if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+                else: disconnect(self); return
+
                 flood_players(self.cards_set, self.table, self.uid)
                 self.table.increment_player()
 
     def vote_handler(self):
         """
-        Vote Handler
+        Function to handle the voting process, which is done in a separate thread.
+        :return: None
         """
         while not self.table.start_event.is_set():
             msg = receive_message(self)
@@ -295,19 +347,24 @@ class Player(threading.Thread):
                 self.table.players[self.uid]["voted"] = True
             elif msg == "False":
                 self.table.players[self.uid]["voted"] = False
+        exit()
 
     def shuffle_handler(self):
         """
-        Shuffle Handler
+        Function to handle the reshuffling of the deck. Player sided. Sends the new cards to the player.
+        :return: None
         """
         self.reshuffle.wait()
         self.reshuffle.clear()
         send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+        time.sleep(send_delay)
+        send_message_to_player(self, f"{self.table.card_of_round}")
 
 
     def data_dump(self):
         """
-        Data Dump
+        Function to send the player dict to the client.
+        :return: None
         """
         data = ""
         for i in self.table.players:
@@ -316,7 +373,7 @@ class Player(threading.Thread):
 
     def gun_handler(self):
         """
-        Gun Handler
+        Function to handle the gun logic. If the player is shot, the player is set to dead. This info is sent to all players.
         """
         random.shuffle(self.gun)
         if self.gun[0]:
@@ -337,6 +394,7 @@ class TableManager:
     def get_or_create_table(self):
         """
         Find a non-running table or create a new one.
+        :return: A table object
         """
         for table in self.tables:
             if not table.game_started:
@@ -351,6 +409,12 @@ class TableManager:
     def add_player_to_table(self, name, skin, conn):
         """
         Add a player to a non-running table.
+        :param name: Name of the player
+        :type name: str
+        :param skin: Skin of the player
+        :type skin: str
+        :param conn: Connection object of the player
+        :type conn: socket object
         """
         table = self.get_or_create_table()
         uid = table.add_player(name, skin, conn)
