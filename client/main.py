@@ -37,6 +37,8 @@ class Main(ur.Entity):
         '''
         self.state = False
         self.player_ready = False
+        self.current_player = 0
+        self.order = {0:0, 1:3, 2:1, 3:4, 4:2, 5:5}
         self.positions = {
             0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
             1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
@@ -159,8 +161,6 @@ class Main(ur.Entity):
             self.ui.count -= 1
             self.player_ready = False
             #self.ui.wp.enable()
-            #self.ui.text.text = "Not ready"
-            #self.network.send(False)
         else:
             self.ui.count += 1
             self.player_ready = True
@@ -280,6 +280,7 @@ class Main(ur.Entity):
         print(state)
         self.state = False
         self.show_tablecard()
+        time.sleep(1)
         if not state:
             while  True:
                 self.recv = self.network.recv()
