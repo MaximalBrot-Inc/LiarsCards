@@ -28,6 +28,7 @@ class Network(socket.socket):
             self.s.sendall(data.encode())
         except AttributeError:
             pickle_data = pickle.dumps(data)
+            print("sending pickle data")
 
     def receive_first(self):
         '''
@@ -65,13 +66,20 @@ class Network(socket.socket):
         '''
         receive data from the server
         '''
-        data = self.s.recv(2048).decode()
+        data = self.s.recv(2048)
+        
+        try: 
+            data = data.decode()
+        except UnicodeDecodeError: 
+            pass 
+        except:
+            data = pickle.loads(data)
+
         if not data:
             return None
         return data
     
     def recv_cards(self):
-        
         return pickle.loads(self.s.recv(2048))
 
     def disconnect(self):

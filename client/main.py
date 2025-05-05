@@ -26,7 +26,8 @@ if os.path.exists(models_compressed_path):
         print(" ")
     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
     
-thread = th.Thread(target=os.system, args=("start cmd.exe && py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
+# thread = th.Thread(target=os.system,args=("start cmd.exe /K py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
+# time.sleep(1)
 debug = True
 class Main(ur.Entity):
     def __init__(self):
@@ -34,7 +35,7 @@ class Main(ur.Entity):
         '''
         initialize the main class
         '''
-        
+        self.state = False
         self.player_ready = False
         self.positions = {
             0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
@@ -91,12 +92,9 @@ class Main(ur.Entity):
         self.network.send(name)
         self.uid, self.lst = self.network.receive_first()
         
-        
         # self.uid = 0
         
-        
         # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
-        
         
         #sky = ur.Sky()
         self.uid = int(self.uid)
@@ -177,6 +175,7 @@ class Main(ur.Entity):
         if key == 'control':
             self.network.disconnect()
             os.system("taskkill /F /IM python.exe")
+            os.system("taskkill /F /IM cmd.exe")
             exit()
             
         if key == "f3" or key == "3":
@@ -185,24 +184,25 @@ class Main(ur.Entity):
             '''
             self.is_ready()
         
-        if key == "left arrow":
+        if key == "left arrow" and self.state:
             self.player.select_cards(-1)
         
-        if key == "right arrow":
+        if key == "right arrow" and self.state:
             self.player.select_cards(+1)
         
-        if key == "enter" or key == "space":
+        if (key == "enter" or key == "space") and self.state:
             '''
             pick card
             '''
             self.player.pick_card()
         
-        if key == "e":
+        if key == "e" and self.state:
             '''
             throw cards
             '''
             self.throw_cards()
-            
+        
+
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
             #self.network.send(True)
@@ -270,18 +270,22 @@ class Main(ur.Entity):
     
     def game_start(self, state):
         cards = self.network.recv_cards()
+        self.state = state
+
         for seating in self.positions.values():
             if seating[2] == "not used":
                 continue
             seating[2].spawn_cards(cards)
         print(state)
+        self.state = False
+        self.show_tablecard()
         if not state:
             while self.network.recv() != "now":
                 print("waiting for now")
                 pass
-
+        self.state = True
         print(cards)
-        self.player.select_cards(0)
+        
     
     def throw_cards(self):
         '''
@@ -290,12 +294,34 @@ class Main(ur.Entity):
         picked_cards = []
         for i in self.player.cards:
             if i[2] == "locked":
-                picked_cards.append(i)
+                picked_cards.append(self.player.cards.index(i))
         print(picked_cards)
         self.network.send(picked_cards)
     
-    
-    
+    def show_tablecard(self):
+        '''
+        show the card round
+        '''
+        card = self.network.recv()
+        print(f"Table card: {card}")
+        self.tablecard = ur.Entity(model="cube", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
+        self.mover = ur.Entity(update=self.move_card)
+        
+        self.rot_to_achieve = 720
+        self.condition = 1.0
+
+    def move_card(self):
+        '''
+        move the card to the table
+        '''   
+        self.tablecard.rotation_y += 90 * ur.time.dt
+        if self.tablecard.rotation_y >= self.rot_to_achieve:
+            self.tablecard.rotation_y = self.rot_to_achieve
+            ur.destroy(self.mover)
+            ur.destroy(self.tablecard)
+            self.mover = None
+            self.player.select_cards(0)
+            return
 
     
     '''
