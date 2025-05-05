@@ -141,33 +141,32 @@ class Table(threading.Thread):
         old_len = 0
         last_votes = 0
 
-        while 6 > len(self.players) > votes and not 1 < votes:
-            try:
-                print(f"Pregame loop: {len(self.players)} players, {votes} votes")
-                votes = 0
-                changes = False
+        players = self.players.copy()
 
-                if old_len != len(self.players):
-                    old_len = len(self.players)
-                    changes = True
+        while 6 > len(players) > votes and not 1 < votes:
+            print(f"Pregame loop: {len(players)} players, {votes} votes")
+            votes = 0
+            changes = False
 
-                for uid in self.players:
-                    if self.players[uid]["voted"]:
-                        votes += 1
+            if old_len != len(players):
+                old_len = len(players)
+                changes = True
 
-                if votes != last_votes:
-                    changes = True
-                    last_votes = votes
+            for uid in players:
+                if players[uid]["voted"]:
+                    votes += 1
 
-                if changes:
-                    for uid in self.players:
-                        if self.players[uid]["obj"] is not None:
-                            if DEBUG: print(f"Sending update data to player {uid}")
-                            self.players[uid]["obj"].data_dump()
+            if votes != last_votes:
+                changes = True
+                last_votes = votes
 
-            except RuntimeError as e:
-                if DEBUG: print("RuntimeError in pregame loop :", e)
-                pass
+            if changes:
+                for uid in players:
+                    if players[uid]["obj"] is not None:
+                        if DEBUG: print(f"Sending update data to player {uid}")
+                        players[uid]["obj"].data_dump()
+
+            players = self.players.copy()
 
     def game_loop(self):
         """
@@ -183,18 +182,19 @@ class Table(threading.Thread):
 
         self.start_event.set()
         #while self.game_started:
+        players = self.players.copy()
 
         while self.game_started and alive_players >= 1:
             alive_players = self.player_count
-            for uid in self.players:
+            for uid in players:
                 if not self.players[uid]["alive"]:
                     alive_players -= 1
 
             if self.current_player != last_player:
-                self.players[self.current_player]["obj"].now.set()
+                players[self.current_player]["obj"].now.set()
                 #flood_players(f"turn,{self.current_player}", self)
                 if DEBUG: print(f"Player {self.current_player} turn")
-                self.players[self.current_player]["obj"].now.clear()
+                players[self.current_player]["obj"].now.clear()
 
             if self.liar_event.is_set():
                 self.liar_event.clear()
@@ -202,6 +202,7 @@ class Table(threading.Thread):
 
             last_player = self.current_player
 
+            players = self.players.copy()
     def liar_handler(self):
         """
         Function to handle the liar logic. If a player is caught lying, they have to use their gun.
@@ -301,9 +302,11 @@ class Player(threading.Thread):
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
             time.sleep(send_delay)
             send_message_to_player(self, f"{self.table.card_of_round}")
+            if DEBUG: print(f"Player {self.uid} is first")
             self.cards_set = receive_message(self)
-            if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
-            else: disconnect(self); return
+            if DEBUG: print(f"Player {self.uid} sent cards")
+            #if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
+            #else: disconnect(self); return
 
             self.cards_set.sort(invert)
             for card in self.cards_set:
