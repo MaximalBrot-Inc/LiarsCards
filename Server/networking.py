@@ -31,7 +31,7 @@ def connection_closed_handler(func):
                     uid = kwargs.get("uid", None)
                     if uid is None:
                         print("No UID provided for player removal.")
-                        return
+                        return None
                     break
 
             if table is not None and uid is not None:
@@ -82,22 +82,26 @@ def send_message_to_player(player, message):
 
 
 @connection_closed_handler
-def receive_message(player):
+def receive_message(player, msg_size=MSG_SIZE):
     """
     Receive a message from a player
     :param  player: Player instance
     :type player: class
     :return: Message received
     """
-    message = player.connection.recv(MSG_SIZE)
+    if msg_size != MSG_SIZE:
+        message = player.connection.recv(msg_size)
+    else:
+        message = player.connection.recv(MSG_SIZE)
     if DEBUG: print(f"rec: {message}")
     try:
         message = pickle.loads(message)
         if DEBUG: print(f"{message} is pickle")
     except pickle.UnpicklingError:
-        message= message.decode()
-    if DEBUG: print(f"{message} is not pickle")
-    return message
+        message = message.decode()
+        if DEBUG: print(f"{message} is not pickle")
+    finally:
+        return message
 
 
 def disconnect(player):
