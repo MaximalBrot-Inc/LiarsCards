@@ -131,7 +131,7 @@ class Main(ur.Entity):
         #lamp_verankerung = ur.Entity(model=)
         
         light = ur.DirectionalLight(shadows=True, model="cube", scale=1, parent=lamp)
-        light.look_at(ur.Vec3(0, -1, 0))
+        light.look_at(ur.Vec3(0, 0, 0))
         # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.white.tint(-0.7))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
         # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.yellow.tint(-0.6))
@@ -307,7 +307,7 @@ class Main(ur.Entity):
             if i[0].locked == "locked":
                 picked_cards.append(self.player.cards.index(i))
         print(picked_cards)
-        self.network.send(picked_cards)
+        self.network.send(str(picked_cards))
         self.state = False
     
     def show_tablecard(self):
