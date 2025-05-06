@@ -3,7 +3,6 @@ test.py
 *.pyc
 *.bam
 *.blend
-*.glb
 todo
 *.blend1
 start_multiple_clients.py
