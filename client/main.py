@@ -47,7 +47,8 @@ class Main(ur.Entity):
             4: [(-1.75, 0.9, -3.031), (0, 30, 0), "not used"],
             5: [(1.75, 0.9, -3.031), (0, 330, 0), "not used"]
         }
-        self.cards_height = 0.001
+        self.cards_width = 0.1
+        self.cards_dropped_amount = 0
         self.cards_dropped = 0
         
     def window(self):
@@ -303,8 +304,11 @@ class Main(ur.Entity):
         for i in self.player.cards:
             if i[0].locked == "locked":
                 picked_cards += str(self.player.cards.index(i)) + ","
-                self.cards_dropped += 1
-                i[0].throw_cards_on_table(self.cards_dropped*self.cards_height)
+                self.cards_dropped_amount += 1
+        for i in self.player.cards:
+            if i[0].locked == "locked":
+                self.cards_dropped += 1  
+                i[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"
         print(picked_cards)
