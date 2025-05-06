@@ -297,18 +297,18 @@ class Player(threading.Thread):
         Core game loop for the player thread
         :return: None
         """
-        if DEBUG: print(f"Game loop started for player {self.uid}")
+        if DEBUG: print(f"Game loop started for player {self.uid} with {threading.current_thread()}")
 
         if self.first:
             send_message_to_player(self, f"{self.table.current_player}")
             self.initial_cards()
 
             if DEBUG: print(f"Player {self.uid} is first")
-            self.table.cards_set = receive_message(self)  # Ensure cards are received correctly
-            if DEBUG: print(f"Player {self.uid} sent cards: {self.table.cards_set}")
+            cards_set = receive_message(self)  # Ensure cards are received correctly
+            if DEBUG: print(f"Player {self.uid} sent cards: {cards_set}")
 
             try:
-                self.table.cards_set = list(eval(self.table.cards_set))
+                self.table.cards_set = list(eval(cards_set))
             except SyntaxError:
                 self.table.cards_set = self.table.cards_set.split(",")
                 self.table.cards_set = [int(i) for i in self.table.cards_set]
@@ -365,12 +365,15 @@ class Player(threading.Thread):
         :return: None
         """
         while not self.table.start_event.is_set():
-            msg = receive_message(self)
-            if msg == "True":
+            msg = receive_message(self, 5)
+            if msg == "Truee":
                 self.table.players[self.uid]["voted"] = True
             elif msg == "False":
                 self.table.players[self.uid]["voted"] = False
-        exit()
+            elif msg == "Start":
+                if DEBUG: print(f"closing vote handler for {self.uid}")
+                exit()
+
 
     def shuffle_handler(self):
         """
