@@ -326,16 +326,15 @@ class Player(threading.Thread):
         self.sub_thread.start()
 
         while True:
-            if DEBUG: print(f"Waiting for player {self.uid} to send cards")
             self.now.wait()
-
+            if DEBUG: print(f"Waiting for player {self.uid} to send cards")
            # send_message_to_player(self, "now")
 
             return_data = receive_message(self)
             if return_data == "liar":
                 self.table.liar_event.set()
             else:
-                self.cards_set = return_data
+                self.table.cards_set = list(eval(return_data))
 
                 self.played_cards()
 
@@ -357,6 +356,7 @@ class Player(threading.Thread):
         for card in self.table.cards_set:
             self.table.players[self.uid]["cards"].pop(card)
         flood_players(f"{len(self.table.cards_set)}", self.table, self.uid)
+        if DEBUG: print(f"Cards played by {self.uid}: {self.table.cards_set}")
         self.table.increment_player()
 
     def vote_handler(self):
