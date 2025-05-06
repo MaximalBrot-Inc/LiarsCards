@@ -3,10 +3,11 @@ create a player class that will create the player
 """
 import ursina as ur 
 from ursina.prefabs.first_person_controller import FirstPersonController
-from gun import Gun
 from ursina.shaders import lit_with_shadows_shader, unlit_shader
 import math
 
+from gun import Gun
+from card import Card
 
 
 class Player(FirstPersonController):
@@ -65,15 +66,8 @@ class Player(FirstPersonController):
             rad = math.radians(angle)
             x = center_pos[0] + radius * math.cos(rad)
             z = center_pos[2] + radius * math.sin(rad)
-            card = ur.Entity(
-                parent=self.chair,
-                model="cube",
-                position=(x, center_pos[1], z),
-                rotation=(0, -angle, 0),
-                scale=(0.001, 0.2, 0.1),
-                color=ur.color.white.tint(-0.2),
-                shader=unlit_shader
-            )
+
+            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (0, -angle, 0))
             self.cards.append((card, card_data, "not locked"))
         self.cards.reverse()
     
@@ -89,14 +83,15 @@ class Player(FirstPersonController):
         for i in self.cards:
             if i[2] == "not locked":
                 i[0].color = ur.color.white.tint(-0.2)
-        
-        if self.cards[self.card_selected][2] == "not locked":
+        print("is locked: ", self.cards[self.card_selected][0].locked)
+        if self.cards[self.card_selected][0].locked == "not locked":
+            print("not locked")
             self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
         else:
             self.cards[self.card_selected][0].color = ur.color.green.tint(-0.1)
         
         for i in self.cards:
-            if i[2] == "locked" and i[0] != self.cards[self.card_selected][0]:
+            if i[0].locked == "locked" and i[0] != self.cards[self.card_selected][0]:
                 i[0].color = ur.color.green.tint(-0.7)
         print("selected card: ", self.card_selected)
         
@@ -104,33 +99,7 @@ class Player(FirstPersonController):
         '''
         handle the logic for picking cards
         '''
-        if hasattr(self, 'mover') and self.mover:
-            ur.destroy(self.mover)
-        if self.cards[self.card_selected][2] == "not locked":
-            self.cards[self.card_selected][0].color = ur.color.green.tint(-0.2)
-            self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "locked")
-            self.card_to_move = self.cards[self.card_selected][0]
-            self.pos_to_achieve = 0.95
-            self.condition = self.pos_to_achieve - self.card_to_move.y
-        else:
-            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
-            self.cards[self.card_selected] = (self.cards[self.card_selected][0], self.cards[self.card_selected][1], "not locked")
-            self.card_to_move = self.cards[self.card_selected][0]
-            self.pos_to_achieve = 0.9
-            self.condition = self.card_to_move.y - self.pos_to_achieve
-        self.mover = ur.Entity(update=self.move_card)
-            #self.cards[self.card_selected][0].y = 0.9
-            
-        
-    def move_card(self):
-        self.card_to_move.y = ur.lerp(self.card_to_move.y, self.pos_to_achieve, 4 * ur.time.dt)
-        if (self.condition) < 0.01:
-            print(self.condition)
-            ur.destroy(self.mover)
-            self.mover = None
-            return
-    
-    
+        self.cards[self.card_selected][0].pick_card()
 
 
 
