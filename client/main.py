@@ -79,7 +79,7 @@ class Main(ur.Entity):
             skin = input("Enter your skin: ")
             return server, int(port), name + skin
         else:
-            return "127.0.0.1", 8000, "Player1,skin2"
+            #return "127.0.0.1", 8000, "Player1,skin2"
             return "10.5.5.58", 8000, "Player1,skin2"
             
     def threed(self):
@@ -280,11 +280,13 @@ class Main(ur.Entity):
         print(state)
         self.state = False
         self.show_tablecard()
-        time.sleep(1)
         if not state:
+            print("waiting to receive from server")
+            
             while  True:
                 self.recv = self.network.recv()
                 print("recv: ", self.recv)  
+                
                 
                 # if self.recv == "now":
                 #     break
@@ -296,10 +298,12 @@ class Main(ur.Entity):
         '''
         throw cards on the table
         '''
-        picked_cards = []
+        picked_cards = "["
         for i in self.player.cards:
             if i[2] == "locked":
-                picked_cards.append(self.player.cards.index(i))
+                picked_cards += str(self.player.cards.index(i)) + ","
+        if picked_cards:
+            picked_cards = picked_cards[:-1] + "]"
         print(picked_cards)
         self.network.send(picked_cards)
         self.state = False
@@ -326,7 +330,8 @@ class Main(ur.Entity):
             ur.destroy(self.mover)
             ur.destroy(self.tablecard)
             self.mover = None
-            self.player.select_cards(0)
+            if self.state:
+                self.player.select_cards(0)
             return
 
     
