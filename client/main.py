@@ -130,12 +130,17 @@ class Main(ur.Entity):
                         )
         #lamp_verankerung = ur.Entity(model=)
         
-        
-        # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
+        light = ur.DirectionalLight(shadows=True, model="cube", scale=1, parent=lamp)
+        light.look_at(ur.Vec3(0, -1, 0))
+        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.white.tint(-0.7))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
-        # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6), y=0.21, scale=(0.1, 0.1, 0.1))
+        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.yellow.tint(-0.6))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
         # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.yellow.tint(-0.95), y=0.21, scale=(0.1, 0.1, 0.1))
+        # lamp_light.look_at(ur.Vec3(0, -1, 0))+
+        
+        
+        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=False, color=ur.color.white.tint(0.7), y=0.21, scale=(0.1, 0.1, 0.1))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
         
         
@@ -162,7 +167,7 @@ class Main(ur.Entity):
             #self.ui.wp.enable()
         else:
             self.ui.count += 1
-            self.player_ready = True
+            self.player_ready = "Truee"
         self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
         self.network.send(str(self.player_ready))
     
@@ -264,6 +269,7 @@ class Main(ur.Entity):
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self, dic):
+        self.network.send("Start")
         cards = self.network.recv_cards()
         if dic == self.uid:
             state = True
@@ -298,7 +304,7 @@ class Main(ur.Entity):
         '''
         picked_cards = []
         for i in self.player.cards:
-            if i[2] == "locked":
+            if i[0].locked == "locked":
                 picked_cards.append(self.player.cards.index(i))
         print(picked_cards)
         self.network.send(picked_cards)
