@@ -2,7 +2,6 @@ import random
 import threading
 import pickle
 import time
-from operator import invert
 
 from networking import *
 
@@ -30,6 +29,7 @@ class Table(threading.Thread):
         self.cards_set = []
         self.deck = []
         self.liar_event = threading.Event()
+        self.reshuffle_event = threading.Event()
 
     def run(self):
         """
@@ -105,9 +105,11 @@ class Table(threading.Thread):
         for uid in self.players:
             self.players[uid]["cards"] = deck[:5]
             deck = deck[5:]
-            self.players[uid]["obj"].reshuffle.set()
 
-        #shuffle_done_event.set()
+
+        self.reshuffle_event.set()
+        time.sleep(0.1)
+        self.reshuffle_event.clear()
 
     def increment_player(self):
         """
@@ -137,7 +139,6 @@ class Table(threading.Thread):
         It handles the voting process and the player count.
         :return: None
         """
-        votes = 0
         old_len = 0
         last_votes = 0
 
@@ -261,7 +262,6 @@ class Player(threading.Thread):
         self.first = False
         self.now = threading.Event()
         self.cards_set = self.table.cards_set
-        self.reshuffle = threading.Event()
         self.sub_thread = None
 
     def run(self):
@@ -304,20 +304,26 @@ class Player(threading.Thread):
             self.initial_cards()
 
             if DEBUG: print(f"Player {self.uid} is first")
-            self.cards_set = receive_message(self)
-            if DEBUG: print(f"Player {self.uid} sent cards")
-            #if self.cards_set is not None: self.cards_set = self.cards_set.split(",")
-            #else: disconnect(self); return
+            self.table.cards_set = receive_message(self)  # Ensure cards are received correctly
+            if DEBUG: print(f"Player {self.uid} sent cards: {self.table.cards_set}")
+
+            try:
+                self.table.cards_set = list(eval(self.table.cards_set))
+            except SyntaxError:
+                self.table.cards_set = self.table.cards_set.split(",")
+                self.table.cards_set = [int(i) for i in self.table.cards_set]
+                print (f"Player {self.uid} sent invalid cards: {self.table.cards_set}")
 
             self.played_cards()
 
 
         else:
+            if DEBUG: print(f"{self.uid} is sleeping")
             send_message_to_player(self, f"{self.table.current_player}")
             self.initial_cards()
 
-        self.subthread = threading.Thread(target=self.shuffle_handler, daemon=True)
-        self.subthread.start()
+        self.sub_thread = threading.Thread(target=self.shuffle_handler, daemon=True)
+        self.sub_thread.start()
 
         while True:
             if DEBUG: print(f"Waiting for player {self.uid} to send cards")
@@ -338,18 +344,19 @@ class Player(threading.Thread):
         Function to send the initial cards to the player.
         :return: None
         """
+        if DEBUG: print(f"{self.uid} initial cards")
         time.sleep(send_delay)
-        print(self.table.players[self.uid]["cards"])
-        print(self.table.card_of_round)
+        if DEBUG: print(self.table.players[self.uid]["cards"])
+        if DEBUG: print(self.table.card_of_round)
         send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
         time.sleep(send_delay)
         send_message_to_player(self, f"{self.table.card_of_round}")
 
     def played_cards(self):
-        self.cards_set.sort(reverse=True)
-        for card in self.cards_set:
+        self.table.cards_set.sort(reverse=True)
+        for card in self.table.cards_set:
             self.table.players[self.uid]["cards"].pop(card)
-        flood_players(f"{len(self.cards_set)}", self.table, self.uid)
+        flood_players(f"{len(self.table.cards_set)}", self.table, self.uid)
         self.table.increment_player()
 
     def vote_handler(self):
@@ -370,8 +377,7 @@ class Player(threading.Thread):
         Function to handle the reshuffling of the deck. Player sided. Sends the new cards to the player.
         :return: None
         """
-        self.reshuffle.wait()
-        self.reshuffle.clear()
+        self.table.reshuffle_event.wait()
         send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
         time.sleep(send_delay)
         send_message_to_player(self, f"{self.table.card_of_round}")

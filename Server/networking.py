@@ -6,6 +6,7 @@ import functools
 import pickle
 
 MSG_SIZE = 2048
+DEBUG = True
 
 
 # Decorator to handle connection closed exceptions
@@ -14,7 +15,7 @@ def connection_closed_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (ConnectionResetError, ConnectionAbortedError, ConnectionError, BrokenPipeError, OSError):
+        except (ConnectionResetError, ConnectionAbortedError, ConnectionError, BrokenPipeError, OSError, EOFError):
             print("Connection closed")
             table, uid = None, None
             for arg in args:
@@ -89,10 +90,13 @@ def receive_message(player):
     :return: Message received
     """
     message = player.connection.recv(MSG_SIZE)
+    if DEBUG: print(f"rec: {message}")
     try:
         message = pickle.loads(message)
+        if DEBUG: print(f"{message} is pickle")
     except pickle.UnpicklingError:
         message= message.decode()
+    if DEBUG: print(f"{message} is not pickle")
     return message
 
 
