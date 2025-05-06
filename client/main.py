@@ -47,7 +47,8 @@ class Main(ur.Entity):
             4: [(-1.75, 0.9, -3.031), (0, 30, 0), "not used"],
             5: [(1.75, 0.9, -3.031), (0, 330, 0), "not used"]
         }
-
+        self.cards_height = 0.001
+        self.cards_dropped = 0
         
     def window(self):
         '''
@@ -79,7 +80,7 @@ class Main(ur.Entity):
             skin = input("Enter your skin: ")
             return server, int(port), name + skin
         else:
-            #return "127.0.0.1", 8000, "Player1,skin2"
+            return "127.0.0.1", 8000, "Player1,skin2"
             return "10.5.5.58", 8000, "Player1,skin2"
             
     def threed(self):
@@ -300,13 +301,16 @@ class Main(ur.Entity):
         '''
         picked_cards = "["
         for i in self.player.cards:
-            if i[2] == "locked":
+            if i[0].locked == "locked":
                 picked_cards += str(self.player.cards.index(i)) + ","
+                self.cards_dropped += 1
+                i[0].throw_cards_on_table(self.cards_dropped*self.cards_height)
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"
         print(picked_cards)
         self.network.send(picked_cards)
         self.state = False
+        
     
     def show_tablecard(self):
         '''

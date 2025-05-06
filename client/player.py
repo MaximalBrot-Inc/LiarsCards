@@ -68,7 +68,7 @@ class Player(FirstPersonController):
             z = center_pos[2] + radius * math.sin(rad)
 
             card = Card(self.chair, card_data[0], (x, center_pos[1], z), (0, -angle, 0))
-            self.cards.append((card, card_data, "not locked"))
+            self.cards.append((card, card_data))
         self.cards.reverse()
     
     def select_cards(self, dir):
@@ -81,7 +81,7 @@ class Player(FirstPersonController):
         elif self.card_selected == len(self.cards):
             self.card_selected = 0
         for i in self.cards:
-            if i[2] == "not locked":
+            if i[0].locked == "not locked":
                 i[0].color = ur.color.white.tint(-0.2)
         print("is locked: ", self.cards[self.card_selected][0].locked)
         if self.cards[self.card_selected][0].locked == "not locked":

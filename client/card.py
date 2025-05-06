@@ -21,9 +21,7 @@ class Card(ur.Entity):
         '''
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)
-        print("is locked: ", self.locked)
         if self.locked == "not locked":
-            print("not locked")
             self.color = ur.color.green.tint(-0.2)
             self.locked = "locked"
             self.card_to_move = self
@@ -46,3 +44,28 @@ class Card(ur.Entity):
             ur.destroy(self.mover)
             self.mover = None
             return
+
+    def throw_cards_on_table(self, param):
+        self.pos_to_achieve = (0, 2 + param, 0)
+        self.rot_to_achieve = (0, 0, 0)
+        pos = self.world_position
+        rot = self.world_rotation
+        self.parent = ur.scene
+        ur.time.sleep(0.1) 
+        print(pos, rot)
+        self.position = pos
+        self.rotation = rot
+        if hasattr(self, 'mover') and self.mover:
+            ur.destroy(self.mover)
+        self.mover = ur.Entity(update=self.update_pos_reset)
+    
+    def update_pos_reset(self):
+        self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 0.5 * ur.time.dt)
+        self.position = ur.lerp(self.position, self.pos_to_achieve, 0.5 * ur.time.dt)
+        if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
+            ur.destroy(self.mover)
+            self.mover = None
+            return
+
+if __name__ == '__main__':
+    import main
