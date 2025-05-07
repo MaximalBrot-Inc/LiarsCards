@@ -158,6 +158,7 @@ class Main(ur.Entity):
             self.spawn_people(i)
         th.Thread(target=self.wait, daemon=True).start()
         #ur.invoke(kb.press_and_release, "alt+tab", delay=0.5)
+        ur.invoke(self.is_ready, delay=3)
         
         
     def is_ready(self):
