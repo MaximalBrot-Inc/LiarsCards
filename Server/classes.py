@@ -118,6 +118,9 @@ class Table(threading.Thread):
         """
         self.last_player = self.current_player
         self.current_player += 1
+        if self.current_player == self.player_count - 1:
+            self.current_player = 0
+        print(f"Current player: {self.current_player} of {self.player_count-1}")
         while not self.players[self.current_player]["alive"]:
             self.current_player += 1
             if self.current_player == self.player_count-1:
