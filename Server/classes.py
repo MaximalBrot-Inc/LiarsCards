@@ -84,8 +84,18 @@ class Table(threading.Thread):
 
         if DEBUG: print("Shuffling deck")
 
+        if self.player_count == 4:
+            while len(deck) < 20:
+                if len(deck) < 7:
+                    deck.append("Ace")
+                elif len(deck) < 13:
+                    deck.append("Queen")
+                elif len(deck) < 19:
+                    deck.append("King")
+                else:
+                    deck.append("Joker")
 
-        if self.player_count < 7:
+        elif self.player_count < 7:
             while len(deck) < 30:
                 if len(deck) < 9:
                     deck.append("Ace")
@@ -118,12 +128,13 @@ class Table(threading.Thread):
         """
         self.last_player = self.current_player
         self.current_player += 1
-        if self.current_player == self.player_count - 1:
+        print(self.player_count)
+        if self.current_player == self.player_count:
             self.current_player = 0
         print(f"Current player: {self.current_player} of {self.player_count-1}")
         while not self.players[self.current_player]["alive"]:
             self.current_player += 1
-            if self.current_player == self.player_count-1:
+            if self.current_player == self.player_count:
                 self.current_player = 0
 
     def generate_uid(self):
