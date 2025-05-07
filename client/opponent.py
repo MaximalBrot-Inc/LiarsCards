@@ -3,31 +3,40 @@ The enemy class will be used to create enemies that the player will play against
 """
 
 import ursina as ur 
-from gun import Gun
 from ursina.shaders import lit_with_shadows_shader
 import math
+
+from gun import Gun
+from card import Card
+
+
 class Opponent(ur.Entity):
     def __init__(self, pos, uid, model,*args, **kwargs):
         super().__init__(position=pos[uid][0], rotation=pos[uid][1]+(0, 90, 0), *args, **kwargs)
         self.model = model
         self.scale = 2
+        self.cards = []
         self.chair = ur.Entity(parent=self,
-                            model="chair", 
-                            position=(0, -0.385, 0), 
-                            rotation=(0, 180, 0), 
-                            scale=0.75
-                            )
+                        model="chair", 
+                        position=(0, -0.385, 0), 
+                        rotation=(0, 180, 0), 
+                        scale=0.75
+                        )
         
-        self.gun = Gun(self.chair, (0.6, 0.75, -0.1), (0, 90, -90), pos, self)
-        self.name_tag = ur.Text(
-            parent=self,
-            text="username",
-            position=ur.Vec3(0, 1, 0),
-            scale=ur.Vec2(5, 3),
-            billboard=True,
-            color=ur.color.black,
-            origin=ur.Vec2(0, 0)
-        )
+        self.gun = Gun(self.chair, 
+                        (0.6, 0.75, -0.1), 
+                        (0, 90, -90), 
+                        pos, 
+                        self
+                        )
+        self.name_tag = ur.Text(parent=self,
+                        text="username",
+                        position=ur.Vec3(0, 1, 0),
+                        scale=ur.Vec2(5, 3),
+                        billboard=True,
+                        color=ur.color.black,
+                        origin=ur.Vec2(0, 0),
+                        )
         
     def spawn_cards(self, cards):
         center_pos = (0, 0.9, 0)
@@ -38,16 +47,14 @@ class Opponent(ur.Entity):
             rad = math.radians(angle)
             x = center_pos[0] + radius * math.cos(rad)
             z = center_pos[2] + radius * math.sin(rad)
-            card = ur.Entity(
-                parent=self.chair,
-                model="cube",
-                position=(x, center_pos[1], z),
-                rotation=(0, -angle, 0),
-                scale=(0.001, 0.2, 0.1),
-                color=ur.color.white.tint(-0.2),
-                shader=lit_with_shadows_shader
-            )
+            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (0, -angle, 0))
+            self.cards.append((card, card_data))
+        self.cards.reverse()
+        print("\n*5")
+        print(self.cards)
         #self.direction = ur.Vec3(0, 0, 0)
+        
+    
 
     
 

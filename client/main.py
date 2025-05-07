@@ -38,6 +38,7 @@ class Main(ur.Entity):
         self.state = False
         self.player_ready = False
         self.current_player = 0
+        self.opponents = []
         self.order = {0:0, 1:3, 2:1, 3:4, 4:2, 5:5}
         self.positions = {
             0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
@@ -50,6 +51,7 @@ class Main(ur.Entity):
         self.cards_width = 0.1
         self.cards_dropped_amount = 0
         self.cards_dropped = 0
+        self.dropped_cards = []
         
     def window(self):
         '''
@@ -243,9 +245,11 @@ class Main(ur.Entity):
             print()
             self.player = Player(self.positions, uid)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
+            self.opponents.append(self.player)
             self.positions[uid][2] = self.player 
             return
         self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
+        self.opponents.append(self.opponent)
         self.opponent.name_tag.text = name 
         self.positions[uid][2] = self.opponent
         
@@ -287,26 +291,51 @@ class Main(ur.Entity):
         
     def game_loop(self):
         while  True:
-            if not self.state:
-                self.recv = self.network.recv()
-                print("recv: ", self.recv)  
+            
+            self.recv = self.network.recv()
+            print("recv: ", self.recv)  
             
             try: 
                 self.recv = int(self.recv)
-                self.state = True
+                self.cards_dropped_amount = self.recv
+                self.cards_dropped = 0
+                print("cards dropped amount: ", self.cards_dropped_amount)
+                print("cards dropped: ", self.cards_dropped)
+                print("cards: ", self.opponents[self.current_player].cards)
+                for i, card in enumerate(self.opponents[self.current_player].cards):
+                    print("picked card: ", card[0])   
+                    card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
+                    self.cards_dropped += 1
+                    if i == self.cards_dropped_amount - 1:
+                        break
+                        
+
+            
+                self.current_player += 1
+                if self.current_player == self.uid:
+                    self.state = True
+                    self.player.select_cards(0)
                 return
             except:
                 self.liar()
                 
-                
-        
-        
-        
+    def liar(self):
+        raise NotImplementedError("Not implemented yet")
     
+    def delete_cards(self):
+        
+        '''
+        delete cards from the player's hand
+        '''
+        for card in self.dropped_cards:
+            card.delete()
+        
     def throw_cards(self):
         '''
         throw cards on the table
         '''
+        self.cards_dropped = 0
+        self.cards_dropped_amount = 0
         picked_cards = "["
         for i in self.player.cards:
             if i[0].locked == "locked":
