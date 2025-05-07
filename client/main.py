@@ -103,7 +103,7 @@ class Main(ur.Entity):
         # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
         
         #sky = ur.Sky()
-        self.uid = int(self.uid)
+        self.uid = int(self.uid) 
         self.table = ur.Entity(
             model="table.glb",
             position=(0, 0, 0),
@@ -306,10 +306,6 @@ class Main(ur.Entity):
             self.current_player = last_player + 1
             if self.current_player == len(self.opponents):
                 self.current_player = 0
-            print("\n"*5)
-            print("current player: ", self.current_player)
-            print("uid: ", self.uid)    
-            print("\n"*5)
             self.recv = self.network.recv()
             print("recv: ", self.recv)  
             print("current player: ", last_player+1)
@@ -322,10 +318,11 @@ class Main(ur.Entity):
                 print("cards dropped: ", self.cards_dropped)
                 #print("cards: ", self.opponents[self.current_player].cards)
                 for i, card in enumerate(self.opponents[last_player].cards):
-                    print("picked card: ", card[0])   
+                    print("picked card: ", card[1]) 
+                    self.opponents[last_player].cards.remove(card)  
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
                     self.cards_dropped += 1
-                    self.opponents[last_player].cards.pop(i)
+                    
                     if self.cards_dropped == self.cards_dropped_amount:
                         break
                         

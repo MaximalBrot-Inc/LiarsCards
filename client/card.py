@@ -1,13 +1,15 @@
 import ursina as ur
 from ursina.shaders import unlit_shader
 class Card(ur.Entity):
-    def __init__(self, parent, name, position, rotation):
+    def __init__(self, parent, name, position, rotation, model):
         super().__init__(
             parent=parent,
-            model="cube",
+            model=model+".glb",
+            #model="cube",
             position=position,
             rotation=rotation,
-            scale=(0.001, 0.2, 0.1),
+            #scale=(0.001, 0.2, 0.1),
+            scale=2,
             color=ur.color.white.tint(-0.2),
             shader=unlit_shader
         )
@@ -57,7 +59,7 @@ class Card(ur.Entity):
             self.pos_to_achieve = (0, 1.3, -0.6)
         if amount == 5:
             self.pos_to_achieve = (0, 1.3, -0.7)
-        self.rot_to_achieve = (0, 0, -90)
+        self.rot_to_achieve = (0, 0, 180)
         self.pos_to_achieve = ur.Vec3(self.pos_to_achieve[0], self.pos_to_achieve[1], self.pos_to_achieve[2] + (self.add_width * current_amount))
         pos = self.world_position
         rot = self.world_rotation
@@ -71,8 +73,8 @@ class Card(ur.Entity):
         self.mover = ur.Entity(update=self.update_pos_reset)
     
     def update_pos_reset(self):
-        self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 2 * ur.time.dt)
-        self.position = ur.lerp(self.position, self.pos_to_achieve, 0.5 * ur.time.dt)
+        self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 3 * ur.time.dt)
+        self.position = ur.lerp(self.position, self.pos_to_achieve, 1 * ur.time.dt)
         if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
             ur.destroy(self.mover)
             self.mover = None
