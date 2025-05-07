@@ -94,6 +94,9 @@ def receive_message(player, msg_size=MSG_SIZE):
     else:
         message = player.connection.recv(MSG_SIZE)
     if DEBUG: print(f"rec: {message}")
+    if not message:
+        print("No message received")
+        raise EOFError
     try:
         message = pickle.loads(message)
         if DEBUG: print(f"{message} is pickle")

@@ -207,12 +207,16 @@ class Table(threading.Thread):
             for uid in players:
                 if not self.players[uid]["alive"]:
                     alive_players -= 1
-
-            if self.current_player != last_player:
-                players[self.current_player]["obj"].now.set()
-                #flood_players(f"turn,{self.current_player}", self)
-                if DEBUG: print(f"Player {self.current_player} turn")
-                players[self.current_player]["obj"].now.clear()
+            try:
+                if self.current_player != last_player:
+                    players[self.current_player]["obj"].now.set()
+                    #flood_players(f"turn,{self.current_player}", self)
+                    if DEBUG: print(f"Player {self.current_player} turn")
+                    players[self.current_player]["obj"].now.clear()
+            except KeyError:
+                players = self.players.copy()
+                if DEBUG: print(f"\n\n\nKey error, {self.current_player} not in players")
+                continue
 
             if self.liar_event.is_set():
                 self.liar_event.clear()
