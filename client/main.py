@@ -265,7 +265,6 @@ class Main(ur.Entity):
             if type(dic) == int:
                 self.ui.wp.disable()
                 self.game_start(dic)
-                
                 break
             else:
                 for i in dic:
@@ -279,6 +278,11 @@ class Main(ur.Entity):
     
     def game_start(self, dic):
         self.network.send("Start")
+        try:
+            self.recv
+            raise NotImplementedError("WTF HOW")
+        except:
+            pass
         cards = self.network.recv_cards()
         if dic == self.uid:
             state = True
@@ -302,17 +306,14 @@ class Main(ur.Entity):
             self.current_player = last_player + 1
             if self.current_player == len(self.opponents):
                 self.current_player = 0
-            
             print("\n"*5)
             print("current player: ", self.current_player)
             print("uid: ", self.uid)    
             print("\n"*5)
             self.recv = self.network.recv()
             print("recv: ", self.recv)  
-            print("\n"*5)
             print("current player: ", last_player+1)
             print("uid: ", self.uid)    
-            print("\n"*5)
             try: 
                 self.recv = int(self.recv)
                 self.cards_dropped_amount = self.recv
@@ -320,19 +321,21 @@ class Main(ur.Entity):
                 print("cards dropped amount: ", self.cards_dropped_amount)
                 print("cards dropped: ", self.cards_dropped)
                 #print("cards: ", self.opponents[self.current_player].cards)
-                for i, card in enumerate(self.opponents[self.current_player-1].cards):
+                for i, card in enumerate(self.opponents[last_player].cards):
                     print("picked card: ", card[0])   
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
                     self.cards_dropped += 1
-                    self.opponents[self.current_player-1].cards.pop(i)
-                    if i == self.cards_dropped_amount - 1:
+                    self.opponents[last_player].cards.pop(i)
+                    if self.cards_dropped == self.cards_dropped_amount:
                         break
                         
                           
                 if self.current_player == self.uid:
                     self.state = True
                     self.player.select_cards(0)
-                return
+                    print("EXITING SELECT CARDS")
+                    #self.state = False
+                
             except:
                 self.liar()
             
@@ -374,8 +377,7 @@ class Main(ur.Entity):
         print(picked_cards)
         self.network.send(picked_cards)
         self.state = False
-        
-        th.Thread(target=self.game_loop).start()
+        #th.Thread(target=self.game_loop).start()
         
     
     def show_tablecard(self):
