@@ -128,10 +128,9 @@ class Table(threading.Thread):
         """
         self.last_player = self.current_player
         self.current_player += 1
-        print(self.player_count)
         if self.current_player == self.player_count:
             self.current_player = 0
-        print(f"Current player: {self.current_player} of {self.player_count-1}")
+        if DEBUG: print(f"Current player: {self.current_player} of {self.player_count-1}")
         while not self.players[self.current_player]["alive"]:
             self.current_player += 1
             if self.current_player == self.player_count:
@@ -373,6 +372,7 @@ class Player(threading.Thread):
         self.table.cards_set.sort(reverse=True)
         for card in self.table.cards_set:
             self.table.players[self.uid]["cards"].pop(card)
+        flood_players(f"{self.uid}", self.table, self.uid)
         flood_players(f"{len(self.table.cards_set)}", self.table, self.uid)
         if DEBUG: print(f"Cards played by {self.uid}: {self.table.cards_set}")
         self.table.increment_player()
