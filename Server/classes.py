@@ -120,7 +120,7 @@ class Table(threading.Thread):
         self.current_player += 1
         while not self.players[self.current_player]["alive"]:
             self.current_player += 1
-            if self.current_player == self.player_count:
+            if self.current_player == self.player_count-1:
                 self.current_player = 0
 
     def generate_uid(self):
