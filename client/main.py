@@ -7,7 +7,7 @@ import time
 import threading as th
 import ursina as ur  
 from ursina.shaders import lit_with_shadows_shader, basic_lighting_shader, normals_shader, unlit_shader, colored_lights_shader
-import shutil  
+import shutil  # Add this import
 import math
 import keyboard as kb
 
@@ -43,20 +43,22 @@ class Main(ur.Entity):
             0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
             1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
             2: [(1.75, 0.9, 3.031), (0, 210, 0), "not used"],
-            3: [(-1.75, 0.9, -3.031), (0, 30, 0), "not used"],
-            4: [(-1.75, 0.9, 3.031), (0, 150, 0), "not used"],
+            3: [(-1.75, 0.9, 3.031), (0, 150, 0), "not used"],
+            4: [(-1.75, 0.9, -3.031), (0, 30, 0), "not used"],
             5: [(1.75, 0.9, -3.031), (0, 330, 0), "not used"]
         }
-
+        self.cards_width = 0.1
+        self.cards_dropped_amount = 0
+        self.cards_dropped = 0
         
     def window(self):
         '''
         create the window
         '''
-        self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", show_ursina_splash = True, development_mode=debug)
+        self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
 
-        # ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
-        # ur.light.look_at(ur.Vec3(0, -1, 0))        
+        ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
+        ur.light.look_at(ur.Vec3(0, -1, 0))        
        
         
         width, height = ur.window.size
@@ -111,7 +113,8 @@ class Main(ur.Entity):
         room = ur.Entity(model="room.glb", 
                         scale=1, 
                         position=(0, 0, 0), 
-                        #shader=lit_with_shadows_shader,
+                        #shader=unlit_shader,
+                        
                         ) 
         
         god = ur.Entity(model='hatsune_miku',  
@@ -130,17 +133,12 @@ class Main(ur.Entity):
                         )
         #lamp_verankerung = ur.Entity(model=)
         
-        light = ur.DirectionalLight(shadows=True, model="cube", scale=1, parent=lamp)
-        light.look_at(ur.Vec3(0, 0, 0))
-        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.white.tint(-0.7))
-        # lamp_light.look_at(ur.Vec3(0, -1, 0))
-        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=True, color=ur.color.yellow.tint(-0.6))
-        # lamp_light.look_at(ur.Vec3(0, -1, 0))
+        
+        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
+        lamp_light.look_at(ur.Vec3(0, -1, 0))
+        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6), y=0.21, scale=(0.1, 0.1, 0.1))
+        lamp_light.look_at(ur.Vec3(0, -1, 0))
         # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.yellow.tint(-0.95), y=0.21, scale=(0.1, 0.1, 0.1))
-        # lamp_light.look_at(ur.Vec3(0, -1, 0))+
-        
-        
-        # lamp_light = ur.DirectionalLight(parent=lamp, shadows=False, color=ur.color.white.tint(0.7), y=0.21, scale=(0.1, 0.1, 0.1))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
         
         
@@ -178,8 +176,9 @@ class Main(ur.Entity):
         '''
         if key == 'control':
             self.network.disconnect()
-            os.system("taskkill /F /IM python.exe")
             os.system("taskkill /F /IM cmd.exe")
+            os.system("taskkill /F /IM python.exe")
+            
             exit()
             
         if key == "f3" or key == "3":
@@ -283,18 +282,24 @@ class Main(ur.Entity):
             seating[2].spawn_cards(cards)
         print(cards)
         print(state)
-        self.state = False
         self.show_tablecard()
-        time.sleep(2)
-        print("\n"*20)
-        if not state:
-            while  True:
+        self.game_loop()
+        
+    def game_loop(self):
+        while  True:
+            if not self.state:
                 self.recv = self.network.recv()
                 print("recv: ", self.recv)  
+            
+            try: 
+                self.recv = int(self.recv)
+                self.state = True
+                return
+            except:
+                self.liar()
                 
-                # if self.recv == "now":
-                #     break
-        self.state = True
+                
+        
         
         
     
@@ -302,13 +307,22 @@ class Main(ur.Entity):
         '''
         throw cards on the table
         '''
-        picked_cards = []
+        picked_cards = "["
         for i in self.player.cards:
             if i[0].locked == "locked":
-                picked_cards.append(self.player.cards.index(i))
+                picked_cards += str(self.player.cards.index(i)) + ","
+                self.cards_dropped_amount += 1
+        for i in self.player.cards:
+            if i[0].locked == "locked":
+                self.cards_dropped += 1  
+                i[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
+        if picked_cards:
+            picked_cards = picked_cards[:-1] + "]"
         print(picked_cards)
-        self.network.send(str(picked_cards))
+        self.network.send(picked_cards)
         self.state = False
+        th.Thread(target=self.game_loop).start()
+        
     
     def show_tablecard(self):
         '''
@@ -319,7 +333,7 @@ class Main(ur.Entity):
         self.tablecard = ur.Entity(model="cube", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
         self.mover = ur.Entity(update=self.move_card)
         
-        self.rot_to_achieve = 720
+        self.rot_to_achieve = 180
         self.condition = 1.0
 
     def move_card(self):

@@ -16,7 +16,7 @@ class Card(ur.Entity):
         self.locked = "not locked"
         self.add_width = 0.2
         
-    def pick_card(self)  :
+    def pick_card(self):
         '''
         handle the logic for picking cards
         '''
