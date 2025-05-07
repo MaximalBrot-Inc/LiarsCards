@@ -37,7 +37,7 @@ class Main(ur.Entity):
         '''
         self.state = False
         self.player_ready = False
-        self.current_player = 0
+        self.current_player = -1
         self.opponents = []
         self.order = {0:0, 1:3, 2:1, 3:4, 4:2, 5:5}
         self.positions = {
@@ -208,6 +208,9 @@ class Main(ur.Entity):
             '''
             self.throw_cards()
         
+        if key == "ö":
+            os.system("taskkill /F /IM python.exe")
+        
 
             #self.ui.wp.disable()
             #self.ui.text.text = "Ready"
@@ -253,6 +256,7 @@ class Main(ur.Entity):
         self.opponents.append(self.opponent)
         self.opponent.name_tag.text = name 
         self.positions[uid][2] = self.opponent
+        self.opponent.name_tag.text = "jafjlkasdfjlkajlksdf"+str(uid)
         
     def wait(self): 
         while True:
@@ -261,6 +265,7 @@ class Main(ur.Entity):
             if type(dic) == int:
                 self.ui.wp.disable()
                 self.game_start(dic)
+                
                 break
             else:
                 for i in dic:
@@ -292,33 +297,46 @@ class Main(ur.Entity):
         
     def game_loop(self):
         while  True:
+            print("opponents: ", self.opponents)
+            last_player = int(self.network.recv(2))
+            self.current_player = last_player + 1
+            if self.current_player == len(self.opponents):
+                self.current_player = 0
             
+            print("\n"*5)
+            print("current player: ", self.current_player)
+            print("uid: ", self.uid)    
+            print("\n"*5)
             self.recv = self.network.recv()
             print("recv: ", self.recv)  
-            
+            print("\n"*5)
+            print("current player: ", last_player+1)
+            print("uid: ", self.uid)    
+            print("\n"*5)
             try: 
                 self.recv = int(self.recv)
                 self.cards_dropped_amount = self.recv
                 self.cards_dropped = 0
                 print("cards dropped amount: ", self.cards_dropped_amount)
                 print("cards dropped: ", self.cards_dropped)
-                print("cards: ", self.opponents[self.current_player].cards)
-                for i, card in enumerate(self.opponents[self.current_player].cards):
+                #print("cards: ", self.opponents[self.current_player].cards)
+                for i, card in enumerate(self.opponents[self.current_player-1].cards):
                     print("picked card: ", card[0])   
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
                     self.cards_dropped += 1
+                    self.opponents[self.current_player-1].cards.pop(i)
                     if i == self.cards_dropped_amount - 1:
                         break
                         
-
-            
-                self.current_player += 1
+                          
                 if self.current_player == self.uid:
                     self.state = True
                     self.player.select_cards(0)
                 return
             except:
                 self.liar()
+            
+            
                 
     def liar(self):
         raise NotImplementedError("Not implemented yet")
@@ -337,6 +355,7 @@ class Main(ur.Entity):
         '''
         self.cards_dropped = 0
         self.cards_dropped_amount = 0
+        p = []
         picked_cards = "["
         for i in self.player.cards:
             if i[0].locked == "locked":
@@ -346,11 +365,16 @@ class Main(ur.Entity):
             if i[0].locked == "locked":
                 self.cards_dropped += 1  
                 i[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
+                p.append(i)
+        for i in p:
+            self.player.cards.remove(i)
+        
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"
         print(picked_cards)
         self.network.send(picked_cards)
         self.state = False
+        
         th.Thread(target=self.game_loop).start()
         
     

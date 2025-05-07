@@ -34,7 +34,7 @@ class Opponent(ur.Entity):
                         position=ur.Vec3(0, 1, 0),
                         scale=ur.Vec2(5, 3),
                         billboard=True,
-                        color=ur.color.black,
+                        color=ur.color.white,
                         origin=ur.Vec2(0, 0),
                         )
         

@@ -64,11 +64,11 @@ class Network(socket.socket):
             print("list:", a)
             return a
     
-    def recv(self):
+    def recv(self, message_size=2048):
         '''
         receive data from the server
         '''
-        data = self.s.recv(2048)
+        data = self.s.recv(message_size)
         try:
             data = data.decode("utf-8")
         except UnicodeDecodeError:
