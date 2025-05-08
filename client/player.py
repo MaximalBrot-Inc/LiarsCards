@@ -81,18 +81,13 @@ class Player(FirstPersonController):
         elif self.card_selected == len(self.cards):
             self.card_selected = 0
         for i in self.cards:
-            if i[0].locked == "not locked":
-                i[0].color = ur.color.white.tint(-0.2)
+            i[0].border.color = ur.color.clear
         print("is locked: ", self.cards[self.card_selected][0].locked)
-        if self.cards[self.card_selected][0].locked == "not locked":
-            print("not locked")
-            self.cards[self.card_selected][0].color = ur.color.yellow.tint(-0.2)
-        else:
-            self.cards[self.card_selected][0].color = ur.color.green.tint(-0.1)
+        self.cards[self.card_selected][0].border.color = ur.color.yellow
         
-        for i in self.cards:
-            if i[0].locked == "locked" and i[0] != self.cards[self.card_selected][0]:
-                i[0].color = ur.color.green.tint(-0.7)
+        
+        
+
         print("selected card: ", self.card_selected)
         
     def pick_card(self)  :

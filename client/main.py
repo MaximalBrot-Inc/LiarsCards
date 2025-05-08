@@ -39,7 +39,6 @@ class Main(ur.Entity):
         self.player_ready = False
         self.current_player = -1
         self.opponents = []
-        self.order = {0:0, 1:3, 2:1, 3:4, 4:2, 5:5}
         self.positions = {
             0: [(3.5, 0.9, 0.0), (0, -90, 0), "not used" ],
             1: [(-3.5, 0.9, 0.0), (0, 90, 0), "not used"],
@@ -116,7 +115,6 @@ class Main(ur.Entity):
                         scale=1, 
                         position=(0, 0, 0), 
                         #shader=unlit_shader,
-                        
                         ) 
         
         god = ur.Entity(model='hatsune_miku',  

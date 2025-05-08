@@ -17,6 +17,15 @@ class Card(ur.Entity):
         self.mover = None
         self.locked = "not locked"
         self.add_width = 0.2
+        self.border = ur.Entity(
+            parent=self,
+            model='cube',
+            wireframe=True,
+            scale=(0.05, 0.0005, 0.08),
+            color=ur.color.clear,
+            double_sided=True,
+            shader=unlit_shader
+        )
         
     def pick_card(self):
         '''
@@ -25,13 +34,13 @@ class Card(ur.Entity):
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)
         if self.locked == "not locked":
-            self.color = ur.color.green.tint(-0.2)
+            #self.border.color = ur.color.green
             self.locked = "locked"
             self.card_to_move = self
             self.pos_to_achieve = 0.95
             self.condition = self.pos_to_achieve - self.card_to_move.y
         else:
-            self.color = ur.color.yellow.tint(-0.2)
+            #self.border.color = ur.color.clear
             self.locked = "not locked"
             self.card_to_move = self
             self.pos_to_achieve = 0.9
@@ -63,10 +72,12 @@ class Card(ur.Entity):
         self.pos_to_achieve = ur.Vec3(self.pos_to_achieve[0], self.pos_to_achieve[1], self.pos_to_achieve[2] + (self.add_width * current_amount))
         pos = self.world_position
         rot = self.world_rotation
+        scale = self.world_scale
         self.parent = ur.scene
         print(pos, rot)
         self.position = pos
         self.rotation = rot
+        self.scale = scale
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)
 
