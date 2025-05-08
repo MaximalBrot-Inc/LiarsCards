@@ -3,15 +3,18 @@ creating and handling of gun
 """
 import ursina as ur
 import random
+from ursina.shaders import lit_with_shadows_shader
 class Gun(ur.Entity):
     def __init__(self, master, pos, rot, position, opp):
         super().__init__(
             parent = master,
-            model = 'gun.glb',
-            scale = (0.001, 0.001, 0.001),
+            model = ur.load_model('gun.glb', use_deepcopy=True),
+            scale = 0.001,
             #origin = (1, 1, 1),
             rotation = rot,
-            position = pos
+            position = pos,
+            #color=ur.color.white.tint(-0.2),
+            shader=lit_with_shadows_shader,
         )
         self.opp = opp
         #self.updates()

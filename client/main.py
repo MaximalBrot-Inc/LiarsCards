@@ -214,26 +214,26 @@ class Main(ur.Entity):
             #self.ui.text.text = "Ready"
             #self.network.send(True)
             
-        # if key == "space":
-        #     '''
-        #     weapon to head
-        #     '''
-        #     self.player.gun.gun_to_head()
-        #     for i in self.positions.values():
-        #         for j in i:
-        #             if isinstance(j, Opponent):
-        #                 if j.visible_self:
-        #                     j.gun.gun_to_head()
+        if key == "space":
+            '''
+            weapon to head
+            '''
+            self.player.gun.gun_to_head()
+            for i in self.positions.values():
+                for j in i:
+                    if isinstance(j, Opponent):
+                        if j.visible_self:
+                            j.gun.gun_to_head()
             
-        # if key == "control":
-        #     '''
-        #     reset gun
-        #     '''
-        #     self.player.gun.reset()
-        #     for i in self.positions.values():
-        #         for j in i:
-        #             if isinstance(j, Opponent):
-        #                 j.gun.reset()
+        if key == "ü":
+            '''
+            reset gun
+            '''
+            self.player.gun.reset()
+            for i in self.positions.values():
+                for j in i:
+                    if isinstance(j, Opponent):
+                        j.gun.reset()
 
     def spawn_people(self, player):
         '''
@@ -299,14 +299,15 @@ class Main(ur.Entity):
         
     def game_loop(self):
         while  True:
-            print("opponents: ", self.opponents)
-            last_player = int(self.network.recv(2))
+            print("WAITING TO RECEIVE")
+            last_player = int(self.network.recv(1))
+            print("last player: ", last_player)
             self.current_player = last_player + 1
             if self.current_player == len(self.opponents):
                 self.current_player = 0
             self.recv = self.network.recv()
             print("recv: ", self.recv)  
-            print("current player: ", last_player+1)
+            print("current player: ", self.current_player)
             print("uid: ", self.uid)    
             try: 
                 self.recv = int(self.recv)
@@ -315,14 +316,18 @@ class Main(ur.Entity):
                 print("cards dropped amount: ", self.cards_dropped_amount)
                 print("cards dropped: ", self.cards_dropped)
                 #print("cards: ", self.opponents[self.current_player].cards)
-                for i, card in enumerate(self.opponents[last_player].cards):
+                print("len of list", len(self.opponents[last_player].cards))
+                print("picked cards: ", self.opponents[last_player].cards)
+                for i in range(self.cards_dropped_amount):
+                    card = self.opponents[last_player].cards[-1]
                     print("picked card: ", card[1]) 
                     self.opponents[last_player].cards.remove(card)  
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
-                    self.cards_dropped += 1
+                    
                     
                     if self.cards_dropped == self.cards_dropped_amount:
                         break
+                    self.cards_dropped += 1
                         
                           
                 if self.current_player == self.uid:

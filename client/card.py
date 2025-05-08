@@ -5,7 +5,7 @@ class Card(ur.Entity):
         super().__init__(
             parent=parent,
             model=model+".glb",
-            #model="cube",
+            #model="gun.glb",
             position=position,
             rotation=rotation,
             #scale=(0.001, 0.2, 0.1),
