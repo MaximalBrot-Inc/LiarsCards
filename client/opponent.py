@@ -48,7 +48,7 @@ class Opponent(ur.Entity):
             x = center_pos[0] + radius * math.cos(rad)
             z = center_pos[2] + radius * math.sin(rad)
 
-            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), card_data)
+            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), "Blank")
             self.cards.append((card, card_data))
         self.cards.reverse()
         #self.direction = ur.Vec3(0, 0, 0)

@@ -19,12 +19,13 @@ class Card(ur.Entity):
         self.add_width = 0.2
         self.border = ur.Entity(
             parent=self,
-            model='cube',
-            wireframe=True,
-            scale=(0.05, 0.0005, 0.08),
-            color=ur.color.clear,
-            double_sided=True,
-            shader=unlit_shader
+            model="Border.obj",
+            #wireframe=True,
+            scale=1,
+            #color=ur.color.clear,
+            #double_sided=True,
+            shader=unlit_shader,
+            always_on_top=True,
         )
         
     def pick_card(self):

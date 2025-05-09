@@ -318,11 +318,16 @@ class Main(ur.Entity):
                 #print("cards: ", self.opponents[self.current_player].cards)
                 print("len of list", len(self.opponents[last_player].cards))
                 print("picked cards: ", self.opponents[last_player].cards)
+                if self.cards_dropped_amount > 0:
+                    self.delete_cards()
+                    self.dropped_cards = []
                 for i in range(self.cards_dropped_amount):
                     card = self.opponents[last_player].cards[-1]
+                    self.dropped_cards.append(card[0])
                     print("picked card: ", card[1]) 
                     self.opponents[last_player].cards.remove(card)  
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
+                    
                     
                     
                     if self.cards_dropped == self.cards_dropped_amount:
@@ -350,7 +355,7 @@ class Main(ur.Entity):
         delete cards from the player's hand
         '''
         for card in self.dropped_cards:
-            card.delete()
+            ur.destroy(card)
         
     def throw_cards(self):
         '''
