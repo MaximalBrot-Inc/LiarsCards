@@ -11,9 +11,10 @@ from card import Card
 
 
 class Opponent(ur.Entity):
-    def __init__(self, pos, uid, model,*args, **kwargs):
+    def __init__(self, pos, uid, model, table, *args, **kwargs):
         super().__init__(position=pos[uid][0], rotation=pos[uid][1]+(0, 90, 0), *args, **kwargs)
         self.model = model
+        self.table = table
         self.scale = 2
         self.cards = []
         self.chair = ur.Entity(parent=self,
@@ -48,7 +49,7 @@ class Opponent(ur.Entity):
             x = center_pos[0] + radius * math.cos(rad)
             z = center_pos[2] + radius * math.sin(rad)
 
-            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), "Blank")
+            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), "Blank", self.table)
             self.cards.append((card, card_data))
         self.cards.reverse()
         #self.direction = ur.Vec3(0, 0, 0)

@@ -11,10 +11,11 @@ from card import Card
 
 
 class Player(FirstPersonController):
-    def __init__(self, pos, uid, *args, **kwargs):
+    def __init__(self, pos, uid, table, *args, **kwargs):
         super().__init__(position=pos[uid][0]+(0, -0.7, 0), rotation=pos[uid][1], *args, **kwargs)
         # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
         self.model = "human"
+        self.table = table
         self.pos = pos[uid]
         self.gun_pos = (0.6, 0.75, -0.1)
         self.gun_rot = (0, 90, -90)
@@ -67,7 +68,7 @@ class Player(FirstPersonController):
             x = center_pos[0] + radius * math.cos(rad)
             z = center_pos[2] + radius * math.sin(rad)
 
-            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), card_data)
+            card = Card(self.chair, card_data[0], (x, center_pos[1], z), (-90, -angle, -90), card_data, self.table)
             self.cards.append((card, card_data))
         self.cards.reverse()
     

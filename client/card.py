@@ -1,7 +1,7 @@
 import ursina as ur
 from ursina.shaders import unlit_shader
 class Card(ur.Entity):
-    def __init__(self, parent, name, position, rotation, model):
+    def __init__(self, parent, name, position, rotation, model, table):
         super().__init__(
             parent=parent,
             model=model+".glb",
@@ -13,6 +13,7 @@ class Card(ur.Entity):
             color=ur.color.white.tint(-0.2),
             shader=unlit_shader
         )
+        self.table = table
         self.name = name
         self.mover = None
         self.locked = "not locked"
@@ -74,10 +75,10 @@ class Card(ur.Entity):
         pos = self.world_position
         rot = self.world_rotation
         scale = self.world_scale
-        self.parent = ur.scene
+        self.parent = self.table
         print(pos, rot)
-        self.position = pos
-        self.rotation = rot
+        self.world_position = pos
+        self.world_rotation = rot
         self.scale = scale
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)

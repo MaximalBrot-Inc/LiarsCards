@@ -50,7 +50,6 @@ class Main(ur.Entity):
         self.cards_width = 0.1
         self.cards_dropped_amount = 0
         self.cards_dropped = 0
-        self.dropped_cards = []
         
     def window(self):
         '''
@@ -245,12 +244,12 @@ class Main(ur.Entity):
         uid = int(uid)
         if uid == self.uid:
             print()
-            self.player = Player(self.positions, uid)
+            self.player = Player(self.positions, uid, self.table)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
             self.opponents.append(self.player)
             self.positions[uid][2] = self.player 
             return
-        self.opponent = Opponent(self.positions, uid, skin, scale=(0.5, 0.5, 0.5))
+        self.opponent = Opponent(self.positions, uid, skin, self.table, scale=(0.5, 0.5, 0.5))
         self.opponents.append(self.opponent)
         self.opponent.name_tag.text = name 
         self.positions[uid][2] = self.opponent
@@ -306,9 +305,11 @@ class Main(ur.Entity):
             if self.current_player == len(self.opponents):
                 self.current_player = 0
             self.recv = self.network.recv()
+            self.delete_cards()      
             print("recv: ", self.recv)  
             print("current player: ", self.current_player)
             print("uid: ", self.uid)    
+            
             try: 
                 self.recv = int(self.recv)
                 self.cards_dropped_amount = self.recv
@@ -318,12 +319,9 @@ class Main(ur.Entity):
                 #print("cards: ", self.opponents[self.current_player].cards)
                 print("len of list", len(self.opponents[last_player].cards))
                 print("picked cards: ", self.opponents[last_player].cards)
-                if self.cards_dropped_amount > 0:
-                    self.delete_cards()
-                    self.dropped_cards = []
+
                 for i in range(self.cards_dropped_amount):
                     card = self.opponents[last_player].cards[-1]
-                    self.dropped_cards.append(card[0])
                     print("picked card: ", card[1]) 
                     self.opponents[last_player].cards.remove(card)  
                     card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
@@ -334,7 +332,7 @@ class Main(ur.Entity):
                         break
                     self.cards_dropped += 1
                         
-                          
+                   
                 if self.current_player == self.uid:
                     self.state = True
                     self.player.select_cards(0)
@@ -354,13 +352,17 @@ class Main(ur.Entity):
         '''
         delete cards from the player's hand
         '''
-        for card in self.dropped_cards:
-            ur.destroy(card)
+        print("Deleting cards")
+        print(self.table.children)
+        for i in self.table.children:
+            ur.destroy(i)
+        
         
     def throw_cards(self):
         '''
         throw cards on the table
         '''
+        self.delete_cards()      
         self.cards_dropped = 0
         self.cards_dropped_amount = 0
         p = []
