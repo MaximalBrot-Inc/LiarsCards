@@ -193,7 +193,7 @@ class Main(ur.Entity):
         if key == "right arrow" and self.state:
             self.player.select_cards(+1)
         
-        if (key == "enter" or key == "space") and self.state:
+        if key == "enter" and self.state:
             '''
             pick card
             '''
@@ -205,15 +205,15 @@ class Main(ur.Entity):
             '''
             self.throw_cards()
         
-        if key == "ö":
-            os.system("taskkill /F /IM python.exe")
-        
+        if key == "space" and self.state:
+            '''
+            LIAR
+            '''
+            self.network.send("liar")
 
-            #self.ui.wp.disable()
-            #self.ui.text.text = "Ready"
-            #self.network.send(True)
             
-        if key == "space":
+            
+        if key == "ö":
             '''
             weapon to head
             '''
@@ -233,6 +233,7 @@ class Main(ur.Entity):
                 for j in i:
                     if isinstance(j, Opponent):
                         j.gun.reset()
+        
 
     def spawn_people(self, player):
         '''
@@ -343,9 +344,24 @@ class Main(ur.Entity):
                 self.liar()
             
             
-                
+    def reveal_cards(self):
+        '''
+        reveal the cards on the table
+        '''
+        print("Revealing cards")
+        for i in self.table.children:
+            i.reveal_card()
+            
+            
     def liar(self):
-        raise NotImplementedError
+        self.liar_or_nah, uid = self.network.recv().split(",")
+        self.reveal_cards()
+        if self.liar_or_nah == "lie":
+            
+
+            pass
+        else:
+            print("Player did not call liar.")
     
     def delete_cards(self):
         
@@ -355,7 +371,9 @@ class Main(ur.Entity):
         print("Deleting cards")
         print(self.table.children)
         for i in self.table.children:
-            ur.destroy(i)
+            i.reveal_card()
+        
+        
         
         
     def throw_cards(self):

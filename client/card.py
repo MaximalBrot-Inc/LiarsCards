@@ -83,6 +83,11 @@ class Card(ur.Entity):
             ur.destroy(self.mover)
 
         self.mover = ur.Entity(update=self.update_pos_reset)
+        
+    def reveal_card(self):
+        self.rot_to_achieve = (0, -90, 0)
+        self.pos_to_achieve = self.position
+        self.mover = ur.Entity(update=self.update_pos_reset)
     
     def update_pos_reset(self):
         try:
