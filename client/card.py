@@ -61,16 +61,16 @@ class Card(ur.Entity):
 
     def throw_cards_on_table(self, amount, current_amount):
         if amount == 1:
-            self.pos_to_achieve = (0, 1.3, 0)
+            self.pos_to_achieve = (0, .83, 0)
         if amount == 2:
-            self.pos_to_achieve = (0, 1.3, -0.3)
+            self.pos_to_achieve = (0, .83, -0.3)
         if amount == 3:
-            self.pos_to_achieve = (0, 1.3, -0.4)
+            self.pos_to_achieve = (0, .83, -0.4)
         if amount == 4:
-            self.pos_to_achieve = (0, 1.3, -0.6)
+            self.pos_to_achieve = (0, .83, -0.6)
         if amount == 5:
-            self.pos_to_achieve = (0, 1.3, -0.7)
-        self.rot_to_achieve = (0, 0, 180)
+            self.pos_to_achieve = (0, .83, -0.7)
+        self.rot_to_achieve = (0, -90, -180)
         self.pos_to_achieve = ur.Vec3(self.pos_to_achieve[0], self.pos_to_achieve[1], self.pos_to_achieve[2] + (self.add_width * current_amount))
         pos = self.world_position
         rot = self.world_rotation
@@ -79,19 +79,25 @@ class Card(ur.Entity):
         print(pos, rot)
         self.world_position = pos
         self.world_rotation = rot
-        self.scale = scale
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)
 
         self.mover = ur.Entity(update=self.update_pos_reset)
     
     def update_pos_reset(self):
-        self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 3 * ur.time.dt)
-        self.position = ur.lerp(self.position, self.pos_to_achieve, 1 * ur.time.dt)
-        if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
+        try:
+            self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 4 * ur.time.dt)
+            self.position = ur.lerp(self.position, self.pos_to_achieve, 2 * ur.time.dt)
+            if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
+                ur.destroy(self.mover)
+                self.mover = None
+                return
+        except AssertionError:
+            print("Card already destroyed")
             ur.destroy(self.mover)
             self.mover = None
             return
+        
 
 if __name__ == '__main__':
     import main

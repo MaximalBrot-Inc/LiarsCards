@@ -345,7 +345,7 @@ class Main(ur.Entity):
             
                 
     def liar(self):
-        raise NotImplementedError("Not implemented yet")
+        raise NotImplementedError
     
     def delete_cards(self):
         
@@ -385,7 +385,7 @@ class Main(ur.Entity):
         self.network.send(picked_cards)
         self.state = False
         #th.Thread(target=self.game_loop).start()
-        
+
     
     def show_tablecard(self):
         '''
@@ -393,7 +393,7 @@ class Main(ur.Entity):
         '''
         card = self.network.recv()
         print(f"Table card: {card}")
-        self.tablecard = ur.Entity(model="cube", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
+        self.tablecard = ur.Entity(model=f"{card}.glb", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
         self.mover = ur.Entity(update=self.move_card)
         
         self.rot_to_achieve = 180
