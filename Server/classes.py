@@ -239,7 +239,7 @@ class Table(threading.Thread):
 
             data.append(self.players[self.last_player]["cards"][card])
 
-        flood_players({pickle.dumps(data)}, self)
+        flood_players(pickle.dumps(data), self)
 
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
