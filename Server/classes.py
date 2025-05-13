@@ -245,6 +245,7 @@ class Table(threading.Thread):
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
                 if DEBUG: print(f"Player {self.last_player} is a liar")
+                time.sleep(send_delay)
                 flood_players(pickle.dumps(data), self)
                 self.players[self.last_player]["obj"].gun_handler()
                 break
@@ -252,6 +253,7 @@ class Table(threading.Thread):
         else:
             flood_players(f"liar,{self.current_player}", self)
             if DEBUG: print(f"Player {self.current_player} is a liar")
+            time.sleep(send_delay)
             flood_players(pickle.dumps(data), self)
             self.players[self.current_player]["obj"].gun_handler()
 
@@ -412,6 +414,7 @@ class Player(threading.Thread):
             self.table.reshuffle_event.wait()
             time.sleep(1)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            if DEBUG: print(f"Player {self.uid} now has {self.table.players[self.uid]["cards"]}")
             time.sleep(send_delay)
             send_message_to_player(self, f"{self.table.card_of_round}")
 
@@ -434,13 +437,13 @@ class Player(threading.Thread):
         random.shuffle(self.gun)
         if self.gun[0]:
             self.alive = False
-            flood_players(f"gun,{self.uid},live", self.table, self.uid)
+            flood_players(f"gun,{self.uid},live", self.table)
             if DEBUG: print(f"Player {self.uid} is dead")
             self.table.players[self.uid]["gun"] = self.gun
             return
         else:
             self.gun.pop(0)
-            flood_players(f"gun,{self.uid},blank", self.table, self.uid)
+            flood_players(f"gun,{self.uid},blank", self.table)
             if DEBUG: print(f"Player {self.uid} is not dead")
             self.table.players[self.uid]["gun"] = self.gun
             return
