@@ -448,8 +448,8 @@ class Player(threading.Thread):
         :return: None
         """
         for card in self.table.cards_set:
-            if DEBUG: print(f"Card {self.table.players[self.uid]["cards"][card]} removed from player {self.uid}")
-            self.table.players[self.uid]["cards"].pop(card)
+            if DEBUG: print(f"Card {self.table.players[self.table.last_player]["cards"][card]} removed from player {self.uid}")
+            self.table.players[self.table.last_player]["cards"].pop(card)
         self.table.cards_set = []
 
 
