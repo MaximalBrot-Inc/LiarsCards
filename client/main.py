@@ -273,12 +273,11 @@ class Main(ur.Entity):
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self, dic):
-        self.network.send("Start")
         try:
             self.recv
             raise NotImplementedError("WTF HOW")
         except:
-            pass
+            self.network.send("Start")
         cards = self.network.recv_cards()
         cards.reverse()
         if dic == self.uid:
@@ -302,9 +301,7 @@ class Main(ur.Entity):
             last_player = self.network.recv()
             if last_player.startswith("liar"):
                 liar, uid = last_player.split(",")
-                self.liar(uid)
-                print("LIAR\n"*10)
-                
+                self.liar(uid)          
                 break
             last_player = int(last_player)
             
@@ -318,37 +315,35 @@ class Main(ur.Entity):
             print("current player: ", self.current_player)
             print("uid: ", self.uid)    
             
-            try: 
-                self.recv = int(self.recv)
-                self.cards_dropped_amount = self.recv
-                self.cards_dropped = 0
-                print("cards dropped amount: ", self.cards_dropped_amount)
-                print("cards dropped: ", self.cards_dropped)
-                #print("cards: ", self.opponents[self.current_player].cards)
-                print("len of list", len(self.opponents[last_player].cards))
-                print("picked cards: ", self.opponents[last_player].cards)
+            self.recv = int(self.recv)
+            self.cards_dropped_amount = self.recv
+            self.cards_dropped = 0
+            print("cards dropped amount: ", self.cards_dropped_amount)
+            print("cards dropped: ", self.cards_dropped)
+            #print("cards: ", self.opponents[self.current_player].cards)
+            print("len of list", len(self.opponents[last_player].cards))
+            print("picked cards: ", self.opponents[last_player].cards)
 
-                for i in range(self.cards_dropped_amount):
-                    card = self.opponents[last_player].cards[-1]
-                    print("picked card: ", card[1]) 
-                    self.opponents[last_player].cards.remove(card)  
-                    card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
-                    
-                    
-                    
-                    if self.cards_dropped == self.cards_dropped_amount:
-                        break
-                    self.cards_dropped += 1
-                        
-                   
-                if self.current_player == self.uid:
-                    self.state = True
-                    self.player.select_cards(0)
-                    print("EXITING SELECT CARDS")
-                    #self.state = False
+            for i in range(self.cards_dropped_amount):
+                card = self.opponents[last_player].cards[-1]
+                print("picked card: ", card[1]) 
+                self.opponents[last_player].cards.remove(card)  
+                card[0].throw_cards_on_table(self.cards_dropped_amount, self.cards_dropped)
                 
-            except:
-                self.liar()
+                
+                
+                if self.cards_dropped == self.cards_dropped_amount:
+                    break
+                self.cards_dropped += 1
+                    
+                
+            if self.current_player == self.uid:
+                self.state = True
+                self.player.select_cards(0)
+                print("EXITING SELECT CARDS")
+                #self.state = False
+                
+
             
             
     def reveal_cards(self, cards):
@@ -362,16 +357,30 @@ class Main(ur.Entity):
 
     def liar(self, uid):
         cards = self.network.recv()
-        gun, uid, bullet = self.network.recv().split(",")
-        self.reveal_cards()
-        time.sleep(1)
+        str = self.network.recv()
+        print("Receive in liar: ", str)
+        gun, uid, bullet = str.split(",")
+        self.reveal_cards(cards)
         self.opponents[int(uid)].gun.gun_to_head()
+        time.sleep(2)
         if bullet == "live":
             self.opponents[int(uid)].gun.shoot()
-        
-    
+            self.opponents.remove(self.opponents[int(uid)])
+        self.opponents[int(uid)].gun.reset()
+        for i in self.opponents:
+            for z in i.children:
+                print(z.name)
+                if z.name == "card":
+                    print("destroying card")
+                    ur.destroy(z)
+                
+        for i in self.table.children:
+            ur.destroy(i)
+        self.game_start(int(uid))
+
+
     def delete_cards(self):
-        
+
         '''
         delete cards from the player's hand
         '''
@@ -415,7 +424,7 @@ class Main(ur.Entity):
         '''
         card = self.network.recv()
         print(f"Table card: {card}")
-        self.tablecard = ur.Entity(model=f"{card}.glb", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
+        self.tablecard = ur.Entity(model=f"{card}.glb", position=(0, 2.5, 0), scale=8, color=ur.color.white.tint(-0.2), shader=unlit_shader, rotation_x=90)
         self.mover = ur.Entity(update=self.move_card)
         
         self.rot_to_achieve = 360

@@ -13,6 +13,7 @@ class Card(ur.Entity):
             color=ur.color.white.tint(-0.2),
             shader=unlit_shader
         )
+        self.name = "card"
         self.table = table
         self.name = name
         self.mover = None

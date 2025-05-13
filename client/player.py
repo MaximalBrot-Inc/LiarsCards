@@ -16,13 +16,14 @@ class Player(FirstPersonController):
         # pos: [(position), (rotation), (gun_pos), (gun_rot)] of opponents
         self.model = "human"
         self.table = table
+        self.name = "player"
         self.pos = pos[uid]
         self.gun_pos = (0.6, 0.75, -0.1)
         self.gun_rot = (0, 90, -90)
         self.uid = uid
         #self.gun = Gun(self, pos[2], pos[3])
-        self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5)
-        self.gun = Gun(self.chair, self.gun_pos, self.gun_rot, pos, self)
+        self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5, name="chair")
+        self.gun = Gun(self.chair, self.gun_pos, self.gun_rot, pos, self, name="gun")
         self.gravity = 0
         self.cards = []
         self.picked_cards = []

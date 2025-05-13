@@ -5,7 +5,7 @@ import ursina as ur
 import random
 from ursina.shaders import lit_with_shadows_shader
 class Gun(ur.Entity):
-    def __init__(self, master, pos, rot, position, opp):
+    def __init__(self, master, pos, rot, position, opp, name):
         super().__init__(
             parent = master,
             model = ur.load_model('gun.glb', use_deepcopy=True),
@@ -16,6 +16,7 @@ class Gun(ur.Entity):
             #color=ur.color.white.tint(-0.2),
             shader=lit_with_shadows_shader,
         )
+        self.name = name
         self.opp = opp
         #self.updates()
         self.drum = 5

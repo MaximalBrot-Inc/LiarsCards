@@ -17,18 +17,21 @@ class Opponent(ur.Entity):
         self.table = table
         self.scale = 2
         self.cards = []
+        self.name = "opponent"
         self.chair = ur.Entity(parent=self,
                         model="chair", 
                         position=(0, -0.385, 0), 
                         rotation=(0, 180, 0), 
-                        scale=0.75
+                        scale=0.75,
+                        name="chair",
                         )
         
         self.gun = Gun(self.chair, 
                         (0.6, 0.75, -0.1), 
                         (0, 90, -90), 
                         pos, 
-                        self
+                        self,
+                        name="gun",
                         )
         self.name_tag = ur.Text(parent=self,
                         text="username",
@@ -37,6 +40,7 @@ class Opponent(ur.Entity):
                         billboard=True,
                         color=ur.color.white,
                         origin=ur.Vec2(0, 0),
+                        name="name_tag",
                         )
         
     def spawn_cards(self, cards):
