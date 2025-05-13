@@ -48,7 +48,7 @@ def flood_players(message, table, sender_uid=None):
     Flood Players
     Send a message to all players
     :param message: Message to send
-    :type message: str
+    :type message: str or set[bytes]
     :param table: Server instance
     :type table: class
     :param sender_uid: User ID of the sender
@@ -59,14 +59,14 @@ def flood_players(message, table, sender_uid=None):
         # If sender_uid is provided, exclude the sender from the flood
         for uid in table.players:
             if table.players[uid]["uid"] != sender_uid and table.players[uid]["alive"]:
-                if type(message) != bytes:
+                if type(message) != bytes and type(message) != set:
                     table.players[uid]["conn"].sendall(message.encode())
                 else:
                     table.players[uid]["conn"].sendall(message)
     else:
         for uid in table.players:
             if table.players[uid]["alive"]:
-                if type(message) != bytes:
+                if type(message) != bytes and type(message) != set:
                     table.players[uid]["conn"].sendall(message.encode())
                 else:
                     table.players[uid]["conn"].sendall(message)
