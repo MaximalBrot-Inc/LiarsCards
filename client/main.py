@@ -300,7 +300,12 @@ class Main(ur.Entity):
     def game_loop(self):
         while  True:
             print("WAITING TO RECEIVE")
-            last_player = int(self.network.recv(1))
+            last_player = int(self.network.recv())
+            if last_player == "liar":
+                liar, uid = last_player.split(",")
+                self.liar(uid)
+                break
+            
             print("last player: ", last_player)
             self.current_player = last_player + 1
             if self.current_player == len(self.opponents):
@@ -351,17 +356,17 @@ class Main(ur.Entity):
         print("Revealing cards")
         for i in self.table.children:
             i.reveal_card()
-            
-            
-    def liar(self):
-        self.liar_or_nah, uid = self.network.recv().split(",")
-        self.reveal_cards()
-        if self.liar_or_nah == "lie":
-            
 
-            pass
-        else:
-            print("Player did not call liar.")
+
+    def liar(self, uid):
+        cards = self.network.recv()
+        gun, uid, bullet = self.network.recv().split(",")
+        self.reveal_cards()
+        time.sleep(1)
+        self.opponents[int(uid)].gun.gun_to_head()
+        if bullet == "live":
+            self.opponents[int(uid)].gun.shoot()
+        
     
     def delete_cards(self):
         
@@ -373,9 +378,7 @@ class Main(ur.Entity):
         for i in self.table.children:
             i.reveal_card()
         
-        
-        
-        
+
     def throw_cards(self):
         '''
         throw cards on the table
@@ -414,7 +417,7 @@ class Main(ur.Entity):
         self.tablecard = ur.Entity(model=f"{card}.glb", position=(0, 2.5, 0), scale=(0.003, 0.6, 0.3), color=ur.color.white.tint(-0.2), shader=unlit_shader)
         self.mover = ur.Entity(update=self.move_card)
         
-        self.rot_to_achieve = 180
+        self.rot_to_achieve = 360
         self.condition = 1.0
 
     def move_card(self):
