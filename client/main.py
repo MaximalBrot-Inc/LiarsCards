@@ -210,8 +210,6 @@ class Main(ur.Entity):
             LIAR
             '''
             self.network.send("liar")
-
-            
             
         if key == "ö":
             '''
@@ -301,11 +299,14 @@ class Main(ur.Entity):
     def game_loop(self):
         while  True:
             print("WAITING TO RECEIVE")
-            last_player = int(self.network.recv())
-            if last_player == "liar":
+            last_player = self.network.recv()
+            if last_player.startswith("liar"):
                 liar, uid = last_player.split(",")
                 self.liar(uid)
+                print("LIAR\n"*10)
+                
                 break
+            last_player = int(last_player)
             
             print("last player: ", last_player)
             self.current_player = last_player + 1
