@@ -408,6 +408,7 @@ class Player(threading.Thread):
         """
         while self.table.game_started:
             self.table.reshuffle_event.wait()
+            time.sleep(1)
             send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
             time.sleep(send_delay)
             send_message_to_player(self, f"{self.table.card_of_round}")

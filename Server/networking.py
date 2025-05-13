@@ -59,11 +59,17 @@ def flood_players(message, table, sender_uid=None):
         # If sender_uid is provided, exclude the sender from the flood
         for uid in table.players:
             if table.players[uid]["uid"] != sender_uid and table.players[uid]["alive"]:
-                table.players[uid]["conn"].sendall(message.encode())
+                if type(message) != bytes:
+                    table.players[uid]["conn"].sendall(message.encode())
+                else:
+                    table.players[uid]["conn"].sendall(message)
     else:
         for uid in table.players:
             if table.players[uid]["alive"]:
-                table.players[uid]["conn"].sendall(message.encode())
+                if type(message) != bytes:
+                    table.players[uid]["conn"].sendall(message.encode())
+                else:
+                    table.players[uid]["conn"].sendall(message)
 
 
 @connection_closed_handler
