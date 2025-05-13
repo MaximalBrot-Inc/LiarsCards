@@ -69,9 +69,13 @@ class Network(socket.socket):
         receive data from the server
         '''
         data = self.s.recv(message_size)
+        print("data:", data)
         try:
             data = data.decode("utf-8")
+            print("string data")
+            print(data)
         except UnicodeDecodeError:
+            print("pickle data")
             data = pickle.loads(data)
 
         if not data:
