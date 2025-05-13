@@ -239,18 +239,20 @@ class Table(threading.Thread):
 
             data.append(self.players[self.last_player]["cards"][card])
 
-        flood_players(pickle.dumps(data), self)
+
 
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
                 if DEBUG: print(f"Player {self.last_player} is a liar")
+                flood_players(pickle.dumps(data), self)
                 self.players[self.last_player]["obj"].gun_handler()
                 break
 
         else:
             flood_players(f"liar,{self.current_player}", self)
             if DEBUG: print(f"Player {self.current_player} is a liar")
+            flood_players(pickle.dumps(data), self)
             self.players[self.current_player]["obj"].gun_handler()
 
         self.players[self.last_player]["obj"].remove_played_cards()
