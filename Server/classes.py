@@ -232,20 +232,28 @@ class Table(threading.Thread):
         """
         if DEBUG: print("Liar handler called")
         data = []
+        if DEBUG: print(f"{self.players[self.last_player]["cards"]} ")
+        if DEBUG: print(f"{self.cards_set}")
         for card in self.cards_set:
-            data.append(self.players[self.current_player]["obj"].cards[card])
+            if DEBUG: print(f"Card {card} is set \n {self.players[self.last_player]["cards"][card]}")
+
+            data.append(self.players[self.last_player]["cards"][card])
 
         flood_players(f"[{pickle.dumps(data)}]", self)
 
         for card in self.cards_set:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
+                if DEBUG: print(f"Player {self.last_player} is a liar")
                 self.players[self.last_player]["obj"].gun_handler()
                 break
 
         else:
             flood_players(f"liar,{self.current_player}", self)
+            if DEBUG: print(f"Player {self.current_player} is a liar")
             self.players[self.current_player]["obj"].gun_handler()
+
+        self.players[self.last_player]["obj"].remove_played_cards()
 
         self.shuffle_deck()
 
@@ -274,7 +282,6 @@ class Player(threading.Thread):
         self.connection = connection
         self.alive = self.table.players[self.uid]["alive"]
         self.voted = self.table.players[self.uid]["voted"]
-        self.cards = self.table.players[self.uid]["cards"]
         self.gun = self.table.players[self.uid]["gun"]
         self.first = False
         self.now = threading.Event()
@@ -350,7 +357,10 @@ class Player(threading.Thread):
             return_data = receive_message(self)
             if return_data == "liar":
                 self.table.liar_event.set()
+                self.now.clear()
             else:
+                self.remove_played_cards()
+
                 self.table.cards_set = list(eval(return_data))
 
                 self.played_cards()
@@ -370,8 +380,6 @@ class Player(threading.Thread):
 
     def played_cards(self):
         self.table.cards_set.sort(reverse=True)
-        for card in self.table.cards_set:
-            self.table.players[self.uid]["cards"].pop(card)
         flood_players(f"{self.uid}", self.table, self.uid)
         flood_players(f"{len(self.table.cards_set)}", self.table, self.uid)
         if DEBUG: print(f"Cards played by {self.uid}: {self.table.cards_set}")
@@ -398,10 +406,11 @@ class Player(threading.Thread):
         Function to handle the reshuffling of the deck. Player sided. Sends the new cards to the player.
         :return: None
         """
-        self.table.reshuffle_event.wait()
-        send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
-        time.sleep(send_delay)
-        send_message_to_player(self, f"{self.table.card_of_round}")
+        while self.table.game_started:
+            self.table.reshuffle_event.wait()
+            send_message_to_player(self, pickle.dumps(self.table.players[self.uid]["cards"]))
+            time.sleep(send_delay)
+            send_message_to_player(self, f"{self.table.card_of_round}")
 
 
     def data_dump(self):
@@ -423,13 +432,25 @@ class Player(threading.Thread):
         if self.gun[0]:
             self.alive = False
             flood_players(f"gun,{self.uid},live", self.table, self.uid)
+            if DEBUG: print(f"Player {self.uid} is dead")
             self.table.players[self.uid]["gun"] = self.gun
             return
         else:
             self.gun.pop(0)
             flood_players(f"gun,{self.uid},blank", self.table, self.uid)
+            if DEBUG: print(f"Player {self.uid} is not dead")
             self.table.players[self.uid]["gun"] = self.gun
             return
+
+    def remove_played_cards(self):
+        """
+        Function to remove the played cards from the players hand.
+        :return: None
+        """
+        for card in self.table.cards_set:
+            if DEBUG: print(f"Card {self.table.players[self.uid]["cards"][card]} removed from player {self.uid}")
+            self.table.players[self.uid]["cards"].pop(card)
+        self.table.cards_set = []
 
 
 class TableManager:
