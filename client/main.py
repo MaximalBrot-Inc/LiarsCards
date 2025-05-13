@@ -282,6 +282,7 @@ class Main(ur.Entity):
         except:
             pass
         cards = self.network.recv_cards()
+        cards.reverse()
         if dic == self.uid:
             state = True
         else:
@@ -349,7 +350,7 @@ class Main(ur.Entity):
                 self.liar()
             
             
-    def reveal_cards(self):
+    def reveal_cards(self, cards):
         '''
         reveal the cards on the table
         '''
@@ -376,8 +377,7 @@ class Main(ur.Entity):
         print("Deleting cards")
         print(self.table.children)
         for i in self.table.children:
-            i.reveal_card()
-        
+            i.visible = False
 
     def throw_cards(self):
         '''
@@ -402,7 +402,7 @@ class Main(ur.Entity):
         
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"
-        print(picked_cards)
+        print("picked cards: ", picked_cards)
         self.network.send(picked_cards)
         self.state = False
         #th.Thread(target=self.game_loop).start()
