@@ -241,7 +241,7 @@ class Table(threading.Thread):
 
 
 
-        for card in self.cards_set:
+        for card in data:
             if card != self.card_of_round and card != "Joker":
                 flood_players(f"liar,{self.last_player}", self)
                 if DEBUG: print(f"Player {self.last_player} is a liar")
@@ -417,6 +417,7 @@ class Player(threading.Thread):
             if DEBUG: print(f"Player {self.uid} now has {self.table.players[self.uid]["cards"]}")
             time.sleep(send_delay)
             send_message_to_player(self, f"{self.table.card_of_round}")
+            if DEBUG: print(f"Card of round is now {self.table.card_of_round}")
 
 
     def data_dump(self):
