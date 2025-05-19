@@ -19,12 +19,12 @@ from lobby import Lobby
 
 
 # delete model_compressed folder
-models_compressed_path = os.path.join("Client", "models_compressed")
-if os.path.exists(models_compressed_path):
-    print("Deleting models_compressed folder")
-    for i in range(10):
-        print(" ")
-    shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
+# models_compressed_path = os.path.join("Client", "models_compressed")
+# if os.path.exists(models_compressed_path):
+#     print("Deleting models_compressed folder")
+#     for i in range(10):
+#         print(" ")
+#     shutil.rmtree(models_compressed_path)  # Use shutil.rmtree instead of os.system
     
 # thread = th.Thread(target=os.system,args=("start cmd.exe /K py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
 # time.sleep(1)
@@ -55,10 +55,13 @@ class Main(ur.Entity):
         '''
         create the window
         '''
-        self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
 
-        ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
-        ur.light.look_at(ur.Vec3(0, -1, 0))        
+        self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        self.lobby = Lobby()
+
+
+        # ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
+        # ur.light.look_at(ur.Vec3(0, -1, 0))        
        
         
         width, height = ur.window.size
@@ -69,9 +72,7 @@ class Main(ur.Entity):
         if self.aspect_ratio == (8, 5):
             self.aspect_ratio = (16, 10)
         
-
-        #self.ui = UI()
-        self.threed()
+        #self.threed()
         
     def input_shi(self, var=True):
         if var:
@@ -88,7 +89,6 @@ class Main(ur.Entity):
         '''
         starts the 3D game
         '''
-        #self.Lobby.start()
         self.network = Network()
         var = False
         server, port, name = self.input_shi(var)
@@ -369,7 +369,6 @@ class Main(ur.Entity):
         self.opponents[int(uid)].gun.reset()
         for i in self.opponents:
             for z in i.children:
-                print(z.name)
                 if z.name == "card":
                     print("destroying card")
                     ur.destroy(z)
@@ -380,14 +379,13 @@ class Main(ur.Entity):
 
 
     def delete_cards(self):
-
         '''
         delete cards from the player's hand
         '''
         print("Deleting cards")
         print(self.table.children)
         for i in self.table.children:
-            i.visible = False
+            ur.destroy(i)
 
     def throw_cards(self):
         '''
@@ -422,6 +420,7 @@ class Main(ur.Entity):
         '''
         show the card round
         '''
+        print("wait for table card")
         card = self.network.recv()
         print(f"Table card: {card}")
         self.tablecard = ur.Entity(model=f"{card}.glb", position=(0, 2.5, 0), scale=8, color=ur.color.white.tint(-0.2), shader=unlit_shader, rotation_x=90)

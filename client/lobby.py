@@ -1,30 +1,45 @@
-from ursina import *
 import time
+import ursina as ur
 from ursina.prefabs.first_person_controller import FirstPersonController
+from ursina.prefabs.Dropdownmenu import DropdownMenu
 
 class Lobby:
     def __init__(self):
-        window.borderless = True
-        self.start_round = False 
-        self.text_label = Text(text='Enter your name:', origin=(0, 0.5), position=(-0.3, 0.4))
-        self.input_field = InputField(default_value='', origin=(0, 0.5), position=(0.3, 0.4))
-        submit_button = Button(text='Submit', origin=(0, 0.5), position=(0, 0.2), on_click=self.button_action, scale=(0.1, 0.05))
-        start_button = Button(text='start', origin=(0, 0.5), position=(0, -0.2), on_click=self.start)
-        self.result_text = Text(text='', origin=(0, 0.5), position=(0, 0))
+        ur.window.borderless = False
+        # self.start_round = False
+        
+        self.text_label = ur.Text(text=
+        '''
+        Enter your name:
+        
+        
+            Enter server ip:
+        
+        
+        Enter server port:
+        
+        
+                   Select Skin:
+        ''', 
+        position=(-0.3, 0.4)
+        )
+        self.name = ur.InputField(default_value='', position=(0.3, 0.36))
+        self.server_ip = ur.InputField(default_value='', position=(0.3, 0.285))
+        self.server_port = ur.InputField(default_value='', position=(0.3, 0.21))
+        self.Dropdown = DropdownMenu(text="Select Skin", options=['Skin 1', 'Skin 2', 'Skin 3'], position=(2.75, 1.25), scale=(4.5, 0.5), text_size=5)
+        # start_button = ur.Button(text='start', position=(0, -0.2), on_click=self.start, scale=0.2)
+        # self.result_text = ur.Text(text='', position=(0, 0))
+        
 
-    def button_action(self):
-        name = self.input_field.text
-        print(f'Hello, {name}!')
-        self.result_text.text = f'Hello, {name}!'
+
 
     def start(self):
         self.start_round = True
-        entities_copy = scene.entities[:]
+        entities_copy = ur.scene.entities[:]
         for entity in entities_copy:
-            if entity != scene: #prevent the scene itself from being destroyed.
-                destroy(entity)
+            if entity != ur.scene: 
+                ur.destroy(entity)
                 
-        
                 
 
 
