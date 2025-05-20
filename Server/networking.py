@@ -15,14 +15,15 @@ def connection_closed_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (ConnectionResetError, ConnectionAbortedError, ConnectionError, BrokenPipeError, OSError, EOFError):
+        except (ConnectionResetError, ConnectionAbortedError, ConnectionError,
+                BrokenPipeError, OSError, EOFError):
             print("Connection closed")
             table, uid = None, None
             for arg in args:
                 print(arg)
                 if hasattr(arg, "table"):
                     print(f"Player {arg} has disconnected")
-                    table= arg.table
+                    table = arg.table
                     uid = arg.uid
                     break
                 elif hasattr(arg, "players"):
@@ -41,7 +42,6 @@ def connection_closed_handler(func):
     return wrapper
 
 
-
 @connection_closed_handler
 def flood_players(message, table, sender_uid=None):
     """
@@ -58,15 +58,16 @@ def flood_players(message, table, sender_uid=None):
     if sender_uid is not None:
         # If sender_uid is provided, exclude the sender from the flood
         for uid in table.players:
-            if table.players[uid]["uid"] != sender_uid and table.players[uid]["alive"]:
-                if type(message) != bytes:
+            if (table.players[uid]["uid"] != sender_uid
+                    and table.players[uid]["alive"]):
+                if type(message) is not bytes:
                     table.players[uid]["conn"].sendall(message.encode())
                 else:
                     table.players[uid]["conn"].sendall(message)
     else:
         for uid in table.players:
             if table.players[uid]["alive"]:
-                if type(message) != bytes:
+                if type(message) is not bytes:
                     table.players[uid]["conn"].sendall(message.encode())
                 else:
                     table.players[uid]["conn"].sendall(message)
@@ -82,7 +83,7 @@ def send_message(player, message):
     :type message: str or bytes
     :return: None
     """
-    if type(message) != bytes:
+    if type(message) is not bytes:
         message = message.encode()
     player.connection.sendall(message)
 
@@ -99,16 +100,19 @@ def receive_message(player, msg_size=MSG_SIZE):
         message = player.connection.recv(msg_size)
     else:
         message = player.connection.recv(MSG_SIZE)
-    if DEBUG: print(f"rec: {message}")
+    if DEBUG:
+        print(f"rec: {message}")
     if not message:
         print("No message received")
         raise EOFError
     try:
         message = pickle.loads(message)
-        if DEBUG: print(f"{message} is pickle")
+        if DEBUG:
+            print(f"{message} is pickle")
     except pickle.UnpicklingError:
         message = message.decode()
-        if DEBUG: print(f"{message} is not pickle")
+        if DEBUG:
+            print(f"{message} is not pickle")
     finally:
         return message
 
