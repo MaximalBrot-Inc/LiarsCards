@@ -28,7 +28,7 @@ from lobby import Lobby
     
 # thread = th.Thread(target=os.system,args=("start cmd.exe /K py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
 # time.sleep(1)
-debug = True
+debug = False
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -72,8 +72,19 @@ class Main(ur.Entity):
         if self.aspect_ratio == (8, 5):
             self.aspect_ratio = (16, 10)
         
-        #self.threed()
+        self.lobby.start_button.on_click = self.start
         
+        #self.threed()
+    def start(self):
+        self.start_round = True
+        entities_copy = ur.scene.entities[:]
+        for entity in entities_copy:
+            if entity != ur.scene: 
+                ur.destroy(entity)
+        ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
+        ur.light.look_at(ur.Vec3(0, -1, 0))  
+        self.threed()
+                
     def input_shi(self, var=True):
         if var:
             server = input("Enter server ip: ")
