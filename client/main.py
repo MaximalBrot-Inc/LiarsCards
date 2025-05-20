@@ -55,13 +55,14 @@ class Main(ur.Entity):
         '''
         create the window
         '''
-
+        self.readyy = False
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
+        
+
 
 
         # ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
         # ur.light.look_at(ur.Vec3(0, -1, 0))        
-        
         width, height = ur.window.size
         
         gcd = math.gcd(int(width), int(height))
@@ -72,21 +73,27 @@ class Main(ur.Entity):
         # self.threed()
         # return
         self.lobby = Lobby()
+        self.entities_copy = ur.scene.entities[:]
+        
         self.lobby.start_button.on_click = self.start
+        th.Thread(target=self.widgets, daemon=True).start()
         
         
     def start(self):
         self.start_round = True
-        entities_copy = ur.scene.entities[:]
         self.lobby.exit = True
-        for entity in entities_copy:
-            if entity != ur.scene: 
-                ur.destroy(entity)
+        for entity in self.entities_copy:
+            ur.destroy(entity)
         ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
         ur.light.look_at(ur.Vec3(0, -1, 0)) 
         self.lobby.start_button.hovered = False
-        self.threed()
+        th.Thread(target=self.ready).start()
                 
+    def ready(self):
+        while not self.readyy:
+            time.sleep(0.1)
+        self.threed()
+        
     def input_shi(self, var=True):
         if var:
             server = input("Enter server ip: ")
@@ -98,10 +105,65 @@ class Main(ur.Entity):
             return "127.0.0.1", 8000, "Player1,skin2"
             return "10.5.5.58", 8000, "Player1,skin2"
             
+    
+        
+        # self.uid = 0
+        
+       
+        # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
+    def widgets(self):
+        #sky = ur.Sky()
+        self.lamp = ur.Entity(
+            model='Lamp.glb',
+            color=ur.color.light_gray,
+            position=(0, 3, 0),
+            scale=2,
+            visible=False,
+            #shader=lit_with_shadows_shader
+        )
+        
+        self.table = ur.Entity(
+            model="table.glb",
+            position=(0, 0, 0),
+            scale=(1.75, 1.5, 1.75),
+            input=self.input,
+            #shader=lit_with_shadows_shader
+            visible=False,
+
+        )
+        
+
+        self.room = ur.Entity(model="room.glb", 
+                        scale=1, 
+                        position=(0, 0, 0), 
+                        #shader=unlit_shader,
+                        visible=False,
+
+        ) 
+        
+        self.god = ur.Entity(model='hatsune_miku',  
+                        scale=200,
+                        color=ur.color.white.tint(-0.2), 
+                        position=(0, 300, -300), 
+                        rotation=(-90, -180, 0),
+                        visible=False,
+                        #shader=lit_with_shadows_shader
+        )
+        
+        
+        #lamp_verankerung = ur.Entity(model=)
+        self.readyy = True
+        
+        
     def threed(self):
         '''
         starts the 3D game
         '''
+        self.lamp.visible = True
+        self.table.visible = True
+        self.god.visible = True
+        self.room.visible = True
+        
         self.network = Network()
         var = False
         server, port, name = self.input_shi(var)
@@ -109,47 +171,10 @@ class Main(ur.Entity):
         self.network.send(name)
         self.uid, self.lst = self.network.receive_first()
         
-        # self.uid = 0
         
-        # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
-        
-        #sky = ur.Sky()
-        self.uid = int(self.uid) 
-        self.table = ur.Entity(
-            model="table.glb",
-            position=(0, 0, 0),
-            scale=(1.75, 1.5, 1.75),
-            input=self.input
-            #shader=lit_with_shadows_shader
-            )
-        
-
-        room = ur.Entity(model="room.glb", 
-                        scale=1, 
-                        position=(0, 0, 0), 
-                        #shader=unlit_shader,
-                        ) 
-        
-        god = ur.Entity(model='hatsune_miku',  
-                        scale=200,
-                        color=ur.color.white.tint(-0.2), 
-                        position=(0, 300, -300), 
-                        rotation=(-90, -180, 0), 
-                        #shader=lit_with_shadows_shader
-                        )
-        
-        lamp = ur.Entity(model='Lamp.glb',
-                        color=ur.color.light_gray,
-                        position=(0, 3, 0),
-                        scale=2,
-                        #shader=lit_with_shadows_shader
-                        )
-        #lamp_verankerung = ur.Entity(model=)
-        
-        
-        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
+        lamp_light = ur.AmbientLight(parent=self.lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
-        lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.brown.tint(-0.6), y=0.21, scale=(0.1, 0.1, 0.1))
+        lamp_light = ur.AmbientLight(parent=self.lamp, shadows=False, color=ur.color.brown.tint(-0.6), y=0.21, scale=(0.1, 0.1, 0.1))
         lamp_light.look_at(ur.Vec3(0, -1, 0))
         # lamp_light = ur.AmbientLight(parent=lamp, shadows=False, color=ur.color.yellow.tint(-0.95), y=0.21, scale=(0.1, 0.1, 0.1))
         # lamp_light.look_at(ur.Vec3(0, -1, 0))
@@ -157,8 +182,8 @@ class Main(ur.Entity):
         
         #ent = ur.Entity(parent=lamp, model="cube", position=(0, -1, 0))
         
-        
         self.ui = UI(ur.camera.ui)
+        self.uid = int(self.uid)
         x = 0.55 if self.aspect_ratio == (16, 10) else 0.65
         self.ui.wp.position = (x, -0.35)
         
