@@ -28,7 +28,7 @@ from lobby import Lobby
     
 # thread = th.Thread(target=os.system,args=("start cmd.exe /K py C:/Users/Melvin/Desktop/programming/Python/LiarsCards/server/main.py",), daemon=True).start()
 # time.sleep(1)
-debug = False
+debug = True
 class Main(ur.Entity):
     def __init__(self):
         super().__init__()
@@ -57,12 +57,10 @@ class Main(ur.Entity):
         '''
 
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
-        self.lobby = Lobby()
 
 
         # ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
         # ur.light.look_at(ur.Vec3(0, -1, 0))        
-       
         
         width, height = ur.window.size
         
@@ -71,18 +69,22 @@ class Main(ur.Entity):
         self.aspect_ratio = (width // gcd, height // gcd)
         if self.aspect_ratio == (8, 5):
             self.aspect_ratio = (16, 10)
-        
+        # self.threed()
+        # return
+        self.lobby = Lobby()
         self.lobby.start_button.on_click = self.start
         
-        #self.threed()
+        
     def start(self):
         self.start_round = True
         entities_copy = ur.scene.entities[:]
+        self.lobby.exit = True
         for entity in entities_copy:
             if entity != ur.scene: 
                 ur.destroy(entity)
         ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
-        ur.light.look_at(ur.Vec3(0, -1, 0))  
+        ur.light.look_at(ur.Vec3(0, -1, 0)) 
+        self.lobby.start_button.hovered = False
         self.threed()
                 
     def input_shi(self, var=True):
@@ -117,6 +119,7 @@ class Main(ur.Entity):
             model="table.glb",
             position=(0, 0, 0),
             scale=(1.75, 1.5, 1.75),
+            input=self.input
             #shader=lit_with_shadows_shader
             )
         
@@ -188,15 +191,20 @@ class Main(ur.Entity):
         if key == 'control':
             self.network.disconnect()
             os.system("taskkill /F /IM cmd.exe")
-            os.system("taskkill /F /IM python.exe")
-            
+            os.system("taskkill /F /IM python.exe")         
             exit()
-            
+              
         if key == "f3" or key == "3":
             '''
             ready up
             '''
             self.is_ready()
+        
+        if key == "enter" and self.lobby.start_button.hovered:
+            '''
+            exit the lobby
+            '''
+            self.start()
         
         if key == "left arrow" and self.state:
             self.player.select_cards(-1)
