@@ -22,6 +22,7 @@ running = True
 # Create a table manager instance
 table_manager = TableManager()
 
+
 def await_connections():
     """
     Handle incoming connections and makes it possible to quit the server.
@@ -31,10 +32,12 @@ def await_connections():
         try:
             connection, address = Server.accept()
 
-            name, skin = connection.recv(MSG_SIZE).decode().split(",")  # Spielerinformationen empfangen
+            # Get the player name and skin from the client
+            name, skin = connection.recv(MSG_SIZE).decode().split(",")
 
             # Add player to table
-            table, uid = table_manager.add_player_to_table(name, skin, connection)
+            table, uid = table_manager.add_player_to_table(name, skin,
+                                                           connection)
             print(f"Player {connection} joined table {table}")
             # Start player thread
             time.sleep(0.01)
@@ -49,13 +52,13 @@ def await_connections():
             break
 
 
-
 if __name__ == "__main__":
     try:
         while True:
             if connection_thread is None:
                 # Start the connection thread
-                connection_thread = threading.Thread(target=await_connections, daemon=True)
+                connection_thread = threading.Thread(
+                    target=await_connections, daemon=True)
                 connection_thread.start()
 
     except KeyboardInterrupt:
@@ -63,5 +66,3 @@ if __name__ == "__main__":
 
         print("Server is shutting down...")
         Server.close()
-
-
