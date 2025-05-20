@@ -73,7 +73,7 @@ def flood_players(message, table, sender_uid=None):
 
 
 @connection_closed_handler
-def send_message_to_player(player, message):
+def send_message(player, message):
     """
     Send a message to a specific player
     :param player: Player instance
