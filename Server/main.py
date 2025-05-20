@@ -4,11 +4,10 @@ Main Programm for the Server
 import socket
 import threading
 import time
-import asyncio
 
 
-from networking import *
-from classes import *
+from networking import MSG_SIZE
+from classes import Player, TableManager
 
 PORT = 8000
 

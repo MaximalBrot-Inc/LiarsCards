@@ -3,7 +3,7 @@ import threading
 import pickle
 import time
 
-from networking import *
+from networking import flood_players, send_message, receive_message
 
 
 send_delay = 0.1
@@ -348,7 +348,7 @@ class Player(threading.Thread):
         self.table.players[self.uid]["ready"] = True
 
         if DEBUG:
-            print(f"Waiting for game to start")
+            print("Waiting for game to start")
 
         if not self.table.start_event.is_set():
             self.sub_thread = threading.Thread(
