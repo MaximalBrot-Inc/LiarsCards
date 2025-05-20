@@ -10,6 +10,9 @@ from ursina.shaders import lit_with_shadows_shader, basic_lighting_shader, norma
 import shutil  # Add this import
 import math
 import keyboard as kb
+from ursina.prefabs.splash_screen import SplashScreen
+from ursina.prefabs.first_person_controller import FirstPersonController
+
 
 from player import Player
 from opponent import Opponent
@@ -91,6 +94,7 @@ class Main(ur.Entity):
                 
     def ready(self):
         while not self.readyy:
+            SplashScreen()
             time.sleep(0.1)
         self.threed()
         
@@ -153,6 +157,8 @@ class Main(ur.Entity):
         
         #lamp_verankerung = ur.Entity(model=)
         self.readyy = True
+        print("ready")
+        
         
         
     def threed(self):
@@ -285,12 +291,14 @@ class Main(ur.Entity):
         uid, name, skin = player[0], player[1], player[2]
         self.ui.max_player += 1
         uid = int(uid)
+        
         if uid == self.uid:
             print()
             self.player = Player(self.positions, uid, self.table)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
             self.opponents.append(self.player)
             self.positions[uid][2] = self.player 
+            self.player.position = self.positions[uid][0]+(0, -0.7, 0)
             return
         self.opponent = Opponent(self.positions, uid, skin, self.table, scale=(0.5, 0.5, 0.5))
         self.opponents.append(self.opponent)

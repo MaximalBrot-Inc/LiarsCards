@@ -24,10 +24,10 @@ class Player(FirstPersonController):
         #self.gun = Gun(self, pos[2], pos[3])
         self.chair = ur.Entity(model="chair", position=self.position, rotation=self.rotation+(0, -90, 0), scale=1.5, name="chair")
         self.gun = Gun(self.chair, self.gun_pos, self.gun_rot, pos, self, name="gun")
-        self.gravity = 0
         self.cards = []
         self.picked_cards = []
         self.card_selected = 0
+        self.gravity = 0
     
     def disable_movement(self):
         self.speed = 0
