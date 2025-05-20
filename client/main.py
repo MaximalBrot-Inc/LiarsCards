@@ -402,15 +402,16 @@ class Main(ur.Entity):
         '''
         reveal the cards on the table
         '''
-        print("Revealing cards")
-        for i in self.table.children:
-            i.reveal_card()
+
+        for i, child in enumerate(self.table.children):
+            child.reveal_card(cards[i])
 
 
     def liar(self, uid):
         cards = self.network.recv()
         str = self.network.recv()
         print("Receive in liar: ", str)
+        print("cards: ", cards)
         gun, uid, bullet = str.split(",")
         self.reveal_cards(cards)
         self.opponents[int(uid)].gun.gun_to_head()
@@ -443,7 +444,6 @@ class Main(ur.Entity):
         '''
         throw cards on the table
         '''
-        self.delete_cards()      
         self.cards_dropped = 0
         self.cards_dropped_amount = 0
         p = []
@@ -452,6 +452,9 @@ class Main(ur.Entity):
             if i[0].locked == "locked":
                 picked_cards += str(self.player.cards.index(i)) + ","
                 self.cards_dropped_amount += 1
+        if self.cards_dropped_amount == 0:
+            return
+        self.delete_cards()
         for i in self.player.cards:
             if i[0].locked == "locked":
                 self.cards_dropped += 1  
@@ -459,6 +462,9 @@ class Main(ur.Entity):
                 p.append(i)
         for i in p:
             self.player.cards.remove(i)
+        
+              
+
         
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"

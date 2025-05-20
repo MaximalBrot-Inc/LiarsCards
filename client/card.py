@@ -85,7 +85,8 @@ class Card(ur.Entity):
 
         self.mover = ur.Entity(update=self.update_pos_reset)
         
-    def reveal_card(self):
+    def reveal_card(self, card):
+        self.model = card
         self.rot_to_achieve = (0, -90, 0)
         self.pos_to_achieve = self.position
         self.mover = ur.Entity(update=self.update_pos_reset)
