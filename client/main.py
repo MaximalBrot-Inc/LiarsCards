@@ -60,9 +60,6 @@ class Main(ur.Entity):
         '''
         self.readyy = False
         self.app = ur.Ursina(icon="rsz_leserunde.ico", window_title="3D Game", development_mode=debug)
-        
-
-
 
         # ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
         # ur.light.look_at(ur.Vec3(0, -1, 0))        
