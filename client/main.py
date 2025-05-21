@@ -324,8 +324,8 @@ class Main(ur.Entity):
     def game_start(self, dic):
         try:
             self.recv
-            raise NotImplementedError("WTF HOW")
         except:
+            print("Error whaaaaaaaaatt\n"*20)
             self.network.send("Start")
         cards = self.network.recv_cards()
         cards.reverse()
@@ -417,6 +417,7 @@ class Main(ur.Entity):
             self.opponents[int(uid)].gun.shoot()
             self.opponents.remove(self.opponents[int(uid)])
         self.opponents[int(uid)].gun.reset()
+        print("destroying cards\n"*5)
         for i in self.opponents:
             for z in i.children:
                 if z.name == "card":
