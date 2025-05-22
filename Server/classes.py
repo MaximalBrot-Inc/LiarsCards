@@ -290,6 +290,11 @@ class Table(threading.Thread):
 
         self.players[self.last_player]["obj"].remove_played_cards()
 
+        if not self.players[self.current_player]["alive"]:
+            self.increment_player()
+
+        flood_players(f"{self.current_player},{self}")
+
         self.shuffle_deck()
 
         return
@@ -354,6 +359,7 @@ class Player(threading.Thread):
             self.sub_thread = threading.Thread(
                 target=self.vote_handler, daemon=True)
             self.sub_thread.start()
+            self.sub_thread.name = f"VoteHandler-{self.uid}"
 
             self.table.start_event.wait()
 
@@ -401,6 +407,7 @@ class Player(threading.Thread):
         self.sub_thread = threading.Thread(
             target=self.shuffle_handler, daemon=True)
         self.sub_thread.start()
+        self.sub_thread.name = f"ShuffleHandler-{self.uid}"
 
         while True:
             self.now.wait()
@@ -455,7 +462,7 @@ class Player(threading.Thread):
         """
         while not self.table.start_event.is_set():
             msg = receive_message(self, 5)
-            if msg == "Truee":
+            if msg == "True":
                 self.table.players[self.uid]["voted"] = True
             elif msg == "False":
                 self.table.players[self.uid]["voted"] = False

@@ -42,6 +42,7 @@ def await_connections():
             time.sleep(0.01)
             player = Player(connection, table, uid, name, skin)
             player.start()
+            player.name = f"PlayerThread-{uid}"
             # Add player to active threads
             table_manager.active_threads.append(player)
 
@@ -59,6 +60,7 @@ if __name__ == "__main__":
                 connection_thread = threading.Thread(
                     target=await_connections, daemon=True)
                 connection_thread.start()
+                connection_thread.name="ConnectionThread"
 
     except KeyboardInterrupt:
         running = False
