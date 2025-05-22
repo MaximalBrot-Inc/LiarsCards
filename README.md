@@ -19,5 +19,5 @@
 
 #### Walnusskeim
 
-- Making the 3D-Models. Or at least he tries to. He kinda sucks.
+- Making the 3D-Models and the website. Or at least he tries to. He kinda sucks.
 
