@@ -86,7 +86,7 @@ class DropdownMenu(ur.Entity):
 
     def widget(self, fg_color, bg_color):
         bg = ur.Entity(parent=self, model=ur.Quad(aspect=1, radius=self.y_scale*0.2, scale=(self.scales[0], self.scales[1])), color=bg_color, position=(0, 0, 0))
-        fg = ur.Entity(parent=self, model=ur.Quad(aspect=1, radius=self.y_scale*0.1, scale=(self.scales[0]-self.x_scale*0.03125,self.scales[1]-self.x_scale*0.0375)), color=fg_color, position=(0, 0, -0.001))
+        fg = ur.Entity(parent=self, model=ur.Quad(aspect=1, radius=self.y_scale*0.2, scale=(self.scales[0]-self.x_scale*0.02, self.scales[1]-self.x_scale*0.02)), color=fg_color, position=(0, 0, -0.001))
         self.text = ur.Text(
             parent=self,
             text=self.button_text,  # Use the text from the constructor
