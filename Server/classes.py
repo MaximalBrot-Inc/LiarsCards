@@ -293,7 +293,7 @@ class Table(threading.Thread):
         if not self.players[self.current_player]["alive"]:
             self.increment_player()
 
-        flood_players(f"{self.current_player},{self}")
+        flood_players(f"{self.current_player}", self)
 
         self.shuffle_deck()
 
