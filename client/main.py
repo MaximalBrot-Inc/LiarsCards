@@ -21,6 +21,8 @@ from ui import UI
 from lobby import Lobby
 
 
+
+
 # delete model_compressed folder
 # models_compressed_path = os.path.join("Client", "models_compressed")
 # if os.path.exists(models_compressed_path):
@@ -73,61 +75,53 @@ class Main(ur.Entity):
         # self.threed()
         # return
         self.lobby = Lobby()
-        self.entities_copy = ur.camera.ui.children
+        self.entities_copy = ur.scene.entities[:]
         
         self.lobby.start_button.on_click = self.start
         th.Thread(target=self.widgets, daemon=True).start()
         
         
     def start(self):
-        th.Thread(target=self.connect_to_server).start()
+        self.start_round = True
         self.lobby.exit = True
-        self.entities_copy.append(self.lobby.gradient)  
-        #self.lobby.skin.model = None
-        
-        # Proper cleanup of UI elements
         for entity in self.entities_copy:
-            if hasattr(entity, 'disable'):
-                entity.disable()
-            else:
-                try:
-                    ur.destroy(entity)
-                except:
-                    pass
-        
-        # Make sure the WindowPanel is properly cleaned up
-        if hasattr(self.lobby, 'wp') and self.lobby.wp:
-            self.lobby.wp.enabled = False
-            
+            ur.destroy(entity)
         ur.light = ur.DirectionalLight(shadows=False, color=ur.color.white.tint(-0.8))
         ur.light.look_at(ur.Vec3(0, -1, 0)) 
         self.lobby.start_button.hovered = False
-        
-        
+        th.Thread(target=self.ready).start()
                 
     def ready(self):
         while not self.readyy:
             SplashScreen()
             time.sleep(0.1)
-        print("entering 3d")
         self.threed()
         
-    def input_shi(self, var=True):
-        if var:
-            server = input("Enter server ip: ")
-            port = input("Enter server port: ")
-            name = input("Enter your name: ")
-            skin = input("Enter your skin: ")
-            return server, int(port), name + skin
-        else:
-            return "127.0.0.1", 8000, "Player1,skin2"
-            return "10.5.5.58", 8000, "Player1,skin2"
-            
-    
+    def input_shi(self):
+        server = self.lobby.server_ip.text
+        port = self.lobby.server_port.text
+        name = self.lobby.name.text
+        skin = self.lobby.Dropdown.get_selected()
         
+        if skin == None:
+            skin = "default"
+        skin = skin.replace(" ", "").lower()
+        
+        if server == "":
+            server = "127.0.0.1"
+        
+        if port == "":
+            port = 8000
+        
+        if name == "":
+            name = "Player1"
+
+        return server, int(port), name + "," + skin
+
+
         # self.uid = 0
-        
-       
+
+
         # self.lst = [(0, "Player 1", "default", False), (1, "Hello world", "hatsune_miku.glb", False), (2, "Player 1", "skin1", False), (3, "Player 2", "skin2", False), (4, "Player 3", "skin3", False), (5, "Player 4", "default", False)]  # Uncomment and update lst
     def widgets(self):
         #sky = ur.Sky()
@@ -173,34 +167,7 @@ class Main(ur.Entity):
         self.readyy = True
         print("ready")
         
-    def connect_to_server(self):
-        '''
-        connect to the server
-        '''
-        self.network = Network()
-        name = self.lobby.name.text
-        server = self.lobby.server_ip.text
-        port = self.lobby.server_port.text
-        skin = self.lobby.Dropdown.get_selected()
-        print("skin: ", skin)
-        if server == "":
-            server = "127.0.0.1"
-        if port == "":
-            port = 8000
-        if name == "":
-            name = "Player 1"
-        if skin == None:
-            skin = "default"
-        skin = skin.replace(" ", "").lower()
-        print("skin: ", skin)
-        self.network.connect(server, int(port))
-        self.network.send(f"{name},{skin}")
-        self.uid, self.lst = self.network.receive_first()
-        self.ready()
         
-        
-        #self.lobby.start_button.hovered = True
-        #self.lobby.start_button.on_click = self.start
         
     def threed(self):
         '''
@@ -211,7 +178,11 @@ class Main(ur.Entity):
         self.god.visible = True
         self.room.visible = True
         
-        
+        self.network = Network()
+        server, port, name = self.input_shi()
+        self.network.connect(server, port)
+        self.network.send(name)
+        self.uid, self.lst = self.network.receive_first()
         
         
         lamp_light = ur.AmbientLight(parent=self.lamp, shadows=False, color=ur.color.white.tint(-0.7), y=0.21, scale=(0.1, 0.1, 0.1))
@@ -348,7 +319,6 @@ class Main(ur.Entity):
             self.ui.count = 0
             if type(dic) == int:
                 self.ui.wp.disable()
-                self.network.send("Start")
                 self.game_start(dic)
                 break
             else:
@@ -362,7 +332,11 @@ class Main(ur.Entity):
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self, dic):
-        
+        try:
+            self.recv
+        except:
+            print("Error whaaaaaaaaatt\n"*20)
+            self.network.send("Start")
         cards = self.network.recv_cards()
         cards.reverse()
         if dic == self.uid:
@@ -428,7 +402,8 @@ class Main(ur.Entity):
                 print("EXITING SELECT CARDS")
                 #self.state = False
                 
-      
+
+            
             
     def reveal_cards(self, cards):
         '''
@@ -455,14 +430,12 @@ class Main(ur.Entity):
         print("destroying cards\n"*5)
         for i in self.opponents:
             for z in i.children:
-                print(z)
                 if z.name == "card":
                     print("destroying card")
                     ur.destroy(z)
                 
         for i in self.table.children:
             ur.destroy(i)
-        
         uid = self.network.recv()
         print("uid: ", uid)
         self.game_start(int(uid))
