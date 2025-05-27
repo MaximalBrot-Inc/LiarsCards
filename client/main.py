@@ -55,6 +55,7 @@ class Main(ur.Entity):
         self.cards_width = 0.1
         self.cards_dropped_amount = 0
         self.cards_dropped = 0
+        self.current_state = "lobby"
         
     def window(self):
         '''
@@ -226,47 +227,60 @@ class Main(ur.Entity):
         '''
         handle the inputs
         '''
+        # print("key: ", key)
+        # print("state: ", self.state)
+        # print("current state: ", self.current_state)
         if key == 'control':
-            self.network.disconnect()
+            try:
+                self.network.disconnect()
+            except AttributeError:
+                print("Network not initialized")
             os.system("taskkill /F /IM cmd.exe")
             os.system("taskkill /F /IM python.exe")         
             exit()
               
-        if key == "f3" or key == "3":
+        if (key == "f3" or key == "3") and self.current_state == "pre_game":
             '''
             ready up
             '''
             self.is_ready()
         
-        if key == "enter" and self.lobby.start_button.hovered:
+        if key == "enter" and self.lobby.start_button.hovered and self.current_state == "lobby":
             '''
             exit the lobby
             '''
             self.start()
-        
-        if key == "left arrow" and self.state:
+
+        if key == "left arrow" and self.state and self.current_state == "game":
+            '''
+            select cards
+            '''
             self.player.select_cards(-1)
         
-        if key == "right arrow" and self.state:
+        if key == "right arrow" and self.state and self.current_state == "game":
+            '''
+            select cards
+            '''
             self.player.select_cards(+1)
-        
-        if key == "enter" and self.state:
+
+        if key == "enter" and self.state and self.current_state == "game":
             '''
             pick card
             '''
             self.player.pick_card()
-        
-        if key == "e" and self.state:
+
+        if key == "e" and self.state and self.current_state == "game":
             '''
             throw cards
             '''
             self.throw_cards()
-        
-        if key == "space" and self.state:
+
+        if key == "space" and self.state and self.current_state == "game":
             '''
             LIAR
             '''
-            self.network.send("liar")
+            if len(self.table.children) > 0:
+                self.network.send("liar")
             
         if key == "ö":
             '''
@@ -314,6 +328,7 @@ class Main(ur.Entity):
         self.opponent.name_tag.text = name
         
     def wait(self): 
+        self.current_state = "pre_game"
         while True:
             dic = self.network.pre_game()
             self.ui.count = 0
@@ -335,10 +350,10 @@ class Main(ur.Entity):
         try:
             self.recv
         except:
-            print("Error whaaaaaaaaatt\n"*20)
             self.network.send("Start")
         cards = self.network.recv_cards()
         cards.reverse()
+        self.current_state = "game"
         if dic == self.uid:
             state = True
         else:
@@ -401,10 +416,7 @@ class Main(ur.Entity):
                 self.player.select_cards(0)
                 print("EXITING SELECT CARDS")
                 #self.state = False
-                
-
-            
-            
+                    
     def reveal_cards(self, cards):
         '''
         reveal the cards on the table
@@ -440,7 +452,6 @@ class Main(ur.Entity):
         print("uid: ", uid)
         self.game_start(int(uid))
 
-
     def delete_cards(self):
         '''
         delete cards from the player's hand
@@ -472,9 +483,6 @@ class Main(ur.Entity):
                 p.append(i)
         for i in p:
             self.player.cards.remove(i)
-        
-              
-
         
         if picked_cards:
             picked_cards = picked_cards[:-1] + "]"

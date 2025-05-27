@@ -82,10 +82,11 @@ class Card(ur.Entity):
         self.world_rotation = rot
         if hasattr(self, 'mover') and self.mover:
             ur.destroy(self.mover)
-
+        print("throwing card on table")
         self.mover = ur.Entity(update=self.update_pos_reset)
         
     def reveal_card(self, card):
+        print("reveal card")
         self.model = card
         self.rot_to_achieve = (0, -90, 0)
         self.pos_to_achieve = self.position
@@ -96,13 +97,9 @@ class Card(ur.Entity):
             self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 4 * ur.time.dt)
             self.position = ur.lerp(self.position, self.pos_to_achieve, 2 * ur.time.dt)
             if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
-                ur.destroy(self.mover)
-                self.mover = None
                 return
         except AssertionError:
             print("Card already destroyed")
-            ur.destroy(self.mover)
-            self.mover = None
             return
         
 
