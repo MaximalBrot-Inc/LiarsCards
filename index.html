@@ -7,32 +7,62 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 
-
+<footer class="site-footer">
+	<p>Leserunde | By Melvin, Phillip and Maxi ❤ | Last update: [DATUM]</p>
+</footer>
 
 <body>
-	<div class="hero">
-		<div class="overlay"></div>
-	
-		<div class="hamburger-menu">
-			<input id="menu__toggle" type="checkbox" />
-			<label class="menu__btn" for="menu__toggle">
-				<span></span>
-			</label>
+	<div class="hamburger-menu">
+		<input id="menu__toggle" type="checkbox" />
+		<label class="menu__btn" for="menu__toggle">
+			<span></span>
+		</label>
 
-			<ul class="menu__box">
-				<li><a class="menu__item" href="index.html">Home</a></li>
-					<li><a class="menu__item" href="aboutus.html">About us</a></li>
-					<li><a class="menu__item" href="howtoplay.html">How to play</a></li>
-					<li><a class="menu__item" href="screenshots.html">Screenshots</a></li>
-					<li><a class="menu__item" href="ghrepo.html">GitHub Repo</a>
-				</li>
-			</ul>
-		</div>
+		<ul class="menu__box">
+			<li><a class="menu__item" href="index.html">Home</a></li>
+				<li><a class="menu__item" href="aboutus.html">About us</a></li>
+				<li><a class="menu__item" href="howtoplay.html">How to play</a></li>
+				<li><a class="menu__item" href="screenshots.html">Screenshots</a></li>
+				<li><a class="menu__item" href="https://github.com/MaximalBrot-Inc/LiarsCards">GitHub Repo</a>
+			</li>
+		</ul>
 	</div>
 	
-	<footer class="site-footer">
-		<p>Leserunde | By Melvin, Phillip and Maxi ❤ | Last update: [DATUM]</p>
-	</footer>
+	<main class="gallery-container">
+		<button class="gallery-arrow left" onclick="prevImage()">&#10094;</button>
+		<img id="galleryImage" src="pics/bild1.jpg" alt="Galeriebild">
+		<button class="gallery-arrow right" onclick="nextImage()">&#10095;</button>
+	</main>
+	
+	<header class="site-header">
+		<a href="" target="_blank" class="github-logo">
+			<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" />
+	</header>
+	
+<script>
+	const bilder = [
+		'pics/ballin.jpg',
+		'pics/stare.jpg',
+		'pics/V.jpg',
+		'pics/misinfo.jpg'
+	];
+
+	let aktuellesBild = 0;
+	const bildElement = document.getElementById("galleryImage");
+
+	function showImage(index) {
+		aktuellesBild = (index + bilder.length) % bilder.length;
+		bildElement.src = bilder[aktuellesBild];
+	}
+
+	function nextImage() {
+		showImage(aktuellesBild + 1);
+	}
+
+	function prevImage() {
+		showImage(aktuellesBild - 1);
+	}
+</script>
 
 </body>
 </html>
