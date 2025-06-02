@@ -55,6 +55,9 @@ def flood_players(message, table, sender_uid=None):
     :type sender_uid: int
     :return: None
     """
+    if DEBUG:
+        print(f"flooding players with message: {message}")
+
     if sender_uid is not None:
         # If sender_uid is provided, exclude the sender from the flood
         for uid in table.players:
@@ -65,12 +68,13 @@ def flood_players(message, table, sender_uid=None):
                 else:
                     table.players[uid]["conn"].sendall(message)
     else:
+        # If sender_uid is not provided, send to all players
         for uid in table.players:
-            if table.players[uid]["alive"]:
-                if type(message) is not bytes:
-                    table.players[uid]["conn"].sendall(message.encode())
-                else:
-                    table.players[uid]["conn"].sendall(message)
+            #if table.players[uid]["alive"]:
+            if type(message) is not bytes:
+                table.players[uid]["conn"].sendall(message.encode())
+            else:
+                table.players[uid]["conn"].sendall(message)
 
 
 @connection_closed_handler
@@ -94,12 +98,11 @@ def receive_message(player, msg_size=MSG_SIZE):
     Receive a message from a player
     :param  player: Player instance
     :type player: class
+    :param  msg_size: Size of the message to receive. Defaults to MSG_SIZE (2048).
+    :type msg_size: int
     :return: Message received
     """
-    if msg_size != MSG_SIZE:
-        message = player.connection.recv(msg_size)
-    else:
-        message = player.connection.recv(MSG_SIZE)
+    message = player.connection.recv(msg_size)
     if DEBUG:
         print(f"rec: {message}")
     if not message:
