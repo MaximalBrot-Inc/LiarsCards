@@ -19,6 +19,42 @@ body {
 	width: 50px;
 }
 
+.buttons {
+	display: flex;
+	flex-wrap: wrap;
+	bottom: 20rem;
+	gap: 1.5rem;
+	justify-content: center;
+	position: relative;
+	z-index: 1;
+}
+
+.button-box {
+	text-align: center;
+	max-width: 300px;
+}
+
+.button {
+	display: inline-block;
+	border-radius: 15px;
+	background-color: #d8b67e;
+	font-family: Libre Baskerville;
+	border: none;
+	text-align: center;
+	font-size: 1.25rem;
+	padding: 1rem;
+	width: 15rem;
+	cursor: pointer;
+	margin: 5px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	vertical-align: middle;
+}
+
+.button:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2)
+}
+
 .gallery-container {
 	display: flex;
 	justify-content: center;
@@ -76,11 +112,6 @@ body {
   font-size: 1rem;
   z-index: 2;
 }
-
-
-
-
-
 
 #menu__toggle {
   opacity: 0;
@@ -156,4 +187,24 @@ body {
 }
 .menu__item:hover {
   background-color: #CFD8DC;
+}
+
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .slogan {
+    font-size: 1.2rem;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .buttons {
+    flex-direction: column;
+    align-items: center;
+  }
 }
