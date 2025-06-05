@@ -2,6 +2,7 @@ import random
 import threading
 import pickle
 import time
+import math
 
 from networking import flood_players, send_message, receive_message
 
@@ -91,29 +92,16 @@ class Table(threading.Thread):
         if DEBUG:
             print("Shuffling deck")
 
-        if self.player_count == 4:
-            while len(deck) < 20:
-                if len(deck) < 7:
-                    deck.append("Ace")
-                elif len(deck) < 13:
-                    deck.append("Queen")
-                elif len(deck) < 19:
-                    deck.append("King")
-                else:
-                    deck.append("Joker")
+        while len(deck) <= self.player_count*5:
+            if len(deck) <= math.floor((self.player_count*5)/3):
+                deck.append("Ace")
+            elif len(deck) <= math.floor((self.player_count*5)/3)*2:
+                deck.append("Queen")
+            elif len(deck) <= math.floor((self.player_count*5)/3)*3:
+                deck.append("King")
+            else:
+                deck.append("Joker")
 
-        elif self.player_count < 7:
-            while len(deck) < 30:
-                if len(deck) < 9:
-                    deck.append("Ace")
-                elif len(deck) < 18:
-                    deck.append("Queen")
-                elif len(deck) < 27:
-                    deck.append("King")
-                else:
-                    deck.append("Joker")
-        else:
-            raise PermissionError("Not enough players / Not implemented yet")
 
         random.shuffle(deck)
         random.shuffle(deck)
