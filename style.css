@@ -38,7 +38,7 @@ body {
 	display: inline-block;
 	border-radius: 15px;
 	background-color: #d8b67e;
-	font-family: Libre Baskerville;
+	font-family: 'Roboto', sans-serif;
 	border: none;
 	text-align: center;
 	font-size: 1.25rem;
@@ -62,7 +62,6 @@ body {
 	height: 80vh;
 	position: relative;
 	margin-top: 80px;
-	margin-bottom: 80px;
 }
 
 .gallery-container img {
