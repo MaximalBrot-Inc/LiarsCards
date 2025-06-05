@@ -70,6 +70,8 @@ def flood_players(message, table, sender_uid=None):
     else:
         # If sender_uid is not provided, send to all players
         for uid in table.players:
+            if DEBUG:
+                print(f"flooding player {uid} with message: {message}")
             #if table.players[uid]["alive"]:
             if type(message) is not bytes:
                 table.players[uid]["conn"].sendall(message.encode())
