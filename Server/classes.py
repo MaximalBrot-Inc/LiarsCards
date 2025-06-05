@@ -7,6 +7,7 @@ from networking import flood_players, send_message, receive_message
 
 
 send_delay = 0.1
+card_removing_delay = 2.5
 
 DEBUG = True
 
@@ -296,6 +297,7 @@ class Table(threading.Thread):
         if DEBUG:
             print(f"Flooding the players with the current player: {self.current_player}")
 
+        time.sleep(card_removing_delay)
         flood_players(f"{self.current_player}", self)
         time.sleep(send_delay)
 
