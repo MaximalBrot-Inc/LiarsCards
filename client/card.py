@@ -29,6 +29,7 @@ class Card(ur.Entity):
             shader=unlit_shader,
             always_on_top=True,
         )
+        self.error = None
         
     def pick_card(self):
         '''
@@ -84,6 +85,8 @@ class Card(ur.Entity):
             ur.destroy(self.mover)
         print("throwing card on table")
         self.mover = ur.Entity(update=self.update_pos_reset)
+        # self.rotation = self.rot_to_achieve
+        # self.position = self.pos_to_achieve
         
     def reveal_card(self, card):
         print("reveal card")
@@ -91,18 +94,25 @@ class Card(ur.Entity):
         self.rot_to_achieve = (0, -90, 0)
         self.pos_to_achieve = self.position
         self.mover = ur.Entity(update=self.update_pos_reset)
+        # self.rotation = self.rot_to_achieve
+        # self.position = self.pos_to_achieve
     
     def update_pos_reset(self):
         try:
             self.rotation = ur.lerp(self.rotation, self.rot_to_achieve, 4 * ur.time.dt)
             self.position = ur.lerp(self.position, self.pos_to_achieve, 2 * ur.time.dt)
             if (self.rotation - self.rot_to_achieve).length() < 0.01 and (self.position - self.pos_to_achieve).length() < 0.01:
+                ur.destroy(self.mover)
                 return
         except AssertionError:
+            self.error = True
+            ur.destroy(self.mover)
             print("Card already destroyed")
             print("jasjlkdfjkadsf")
-            self.mover.update = None
-            return
+            
+            
+        
+
         
 
 if __name__ == '__main__':

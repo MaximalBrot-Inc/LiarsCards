@@ -451,14 +451,23 @@ class Main(ur.Entity):
         '''
         print("Deleting cards")
         print(self.table.children)
-        for i in self.table.children:
-            ur.destroy(i)
+        
         if all:
             for i in self.opponents:
                 for j in i.cards:
-                    if hasattr(j[0], 'mover') and j[0].mover:
-                        ur.destroy(j[0].mover)
+                    try:
+                        j[0].mover.update = None
+                    except AttributeError:
+                        pass
                     ur.destroy(j[0])
+
+        for i in self.table.children:
+            try:
+                i.mover.update = None
+            except AttributeError:
+                pass
+            ur.destroy(i)
+
 
     def throw_cards(self):
         '''
