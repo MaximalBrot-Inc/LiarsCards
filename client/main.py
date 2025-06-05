@@ -314,13 +314,13 @@ class Main(ur.Entity):
         uid = int(uid)
         
         if uid == self.uid:
-            print()
             self.player = Player(self.positions, uid, self.table)
             self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
             self.opponents.append(self.player)
             self.positions[uid][2] = self.player 
             self.player.position = self.positions[uid][0]+(0, -0.7, 0)
             return
+        
         self.opponent = Opponent(self.positions, uid, skin, self.table, scale=(0.5, 0.5, 0.5))
         self.opponents.append(self.opponent)
         self.opponent.name_tag.text = name 
@@ -439,20 +439,13 @@ class Main(ur.Entity):
             self.opponents[int(uid)].gun.shoot()
             self.opponents.remove(self.opponents[int(uid)])
         self.opponents[int(uid)].gun.reset()
-        print("destroying cards\n"*5)
-        for i in self.opponents:
-            for z in i.children:
-                if z.name == "card":
-                    print("destroying card")
-                    ur.destroy(z)
-                
-        for i in self.table.children:
-            ur.destroy(i)
+        self.delete_cards(all=True)
+        print("cards deleted")
         uid = self.network.recv()
         print("uid: ", uid)
         self.game_start(int(uid))
 
-    def delete_cards(self):
+    def delete_cards(self, all=False):
         '''
         delete cards from the player's hand
         '''
@@ -460,6 +453,12 @@ class Main(ur.Entity):
         print(self.table.children)
         for i in self.table.children:
             ur.destroy(i)
+        if all:
+            for i in self.opponents:
+                for j in i.cards:
+                    if hasattr(j[0], 'mover') and j[0].mover:
+                        ur.destroy(j[0].mover)
+                    ur.destroy(j[0])
 
     def throw_cards(self):
         '''

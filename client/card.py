@@ -100,6 +100,8 @@ class Card(ur.Entity):
                 return
         except AssertionError:
             print("Card already destroyed")
+            print("jasjlkdfjkadsf")
+            self.mover.update = None
             return
         
 
