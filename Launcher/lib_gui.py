@@ -11,7 +11,7 @@ import time
 class GUI(ctk.CTk):
     def __init__(self):
         super().__init__()
-        ctk.set_default_color_theme("themes/orange.json")      
+        ctk.set_default_color_theme("Launcher/themes/orange.json")      
         self._set_appearance_mode("dark")             
         self.title("Liars Cards Launcher")
         self.geometry("800x600")
@@ -21,8 +21,8 @@ class GUI(ctk.CTk):
     def set_background(self):
         try:
             self.bg_image = ctk.CTkImage(
-                light_image=Image.open("launcher_bg.png"),
-                dark_image=Image.open("launcher_bg.png"),
+                light_image=Image.open("Launcher/launcher_bg.png"),
+                dark_image=Image.open("Launcher/launcher_bg.png"),
                 size=(self.winfo_width(), self.winfo_height())
             )
             self.bg_label = ctk.CTkLabel(self, image=self.bg_image, text="")
