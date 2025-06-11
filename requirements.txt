@@ -1,2 +1,4 @@
 ursina[extras]~=7.0.0
 keyboard ~=0.13.5
+customtkinter ~=5.2.0
+requests ~=2.31.0
