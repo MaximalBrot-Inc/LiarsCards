@@ -7,9 +7,7 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 
-<footer class="site-footer">
-	<p>Leserunde | By Melvin, Phillip and Maxi ❤ | Last update: [DATUM]</p>
-</footer>
+
 
 <body>
 	<div class="hamburger-menu">
@@ -28,55 +26,36 @@
 		</ul>
 	</div>
 	
-	<main class="gallery-container">
-		<button class="gallery-arrow left" onclick="prevImage()">&#10094;</button>
-		<img id="galleryImage" src="pics/bild1.jpg" alt="Galeriebild">
-		<button class="gallery-arrow right" onclick="nextImage()">&#10095;</button>
-	</main>
-	
 	<header class="site-header">
 		<a href="https://github.com/MaximalBrot-Inc/LiarsCards"  target="_blank" rel="noopener noreferrer" class="github-logo">
 			<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" />
+		</a>
 	</header>
 	
-	<div class="buttons">
-		<div class="button-box">
-			<a href="https://github.com/MaximalBrot-Inc/LiarsCards/releases/latest"  target="_blank" rel="noopener noreferrer"">
-				<button class="button" style="vertical-align:middle; background-color: #2FFF2B; color: black;"><span><b>Download</b></span></button>
-			</a>
+	<div class="content">
+		<div class="title">
+			<h1>Leserunde</h1>
+			<h2 class="description">A game, inspired by <i>Liar's Bar</i></h2>
 		</div>
 		
-		<div class="button-box">
-			<a href="howtoplay.html">
-				<button class="button" style="vertical-align:middle; background-color: #C9C9C9; color: black;"><span><b>How to play</b></span></button>
-			</a>
+		<div class="buttons">
+			<div class="button-box">
+				<a href="https://github.com/MaximalBrot-Inc/LiarsCards/releases/latest"  target="_blank" rel="noopener noreferrer"">
+					<button class="button" style="vertical-align:middle; background-color: #2FFF2B; color: black;"><span><b>Download</b></span></button>
+				</a>
+			</div>
+			
+			<div class="button-box">
+				<a href="howtoplay.html">
+					<button class="button" style="vertical-align:middle; background-color: #C9C9C9; color: black;"><span><b>How to play</b></span></button>
+				</a>
+			</div>
 		</div>
 	</div>
 	
-<script>
-	const bilder = [
-		'pics/pov.png',
-		'pics/side.png',
-		'pics/lobby.png',
-		'pics/miku.png'
-	];
-
-	let aktuellesBild = 0;
-	const bildElement = document.getElementById("galleryImage");
-
-	function showImage(index) {
-		aktuellesBild = (index + bilder.length) % bilder.length;
-		bildElement.src = bilder[aktuellesBild];
-	}
-
-	function nextImage() {
-		showImage(aktuellesBild + 1);
-	}
-
-	function prevImage() {
-		showImage(aktuellesBild - 1);
-	}
-</script>
+	<footer class="site-footer">
+		<p>Leserunde | By Melvin, Phillip and Maxi ❤ | Last update: [DATUM]</p>
+	</footer>
 
 </body>
 </html>
