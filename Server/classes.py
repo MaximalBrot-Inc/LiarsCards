@@ -192,7 +192,7 @@ class Table(threading.Thread):
         It handles the game logic and player turns.
         :return: None
         """
-        last_player = 0
+        active_player = 0
 
         self.shuffle_deck()
         alive_players = self.player_count
@@ -200,20 +200,21 @@ class Table(threading.Thread):
         self.players[self.current_player]["obj"].first = True
 
         self.start_event.set()
-        players = self.players.copy()
 
         while self.game_started and alive_players >= 1:
+            players = self.players.copy()
+
             alive_players = self.player_count
             for uid in players:
                 if not self.players[uid]["alive"]:
                     alive_players -= 1
             try:
-                if self.current_player != last_player:
+                if self.current_player != active_player:
                     players[self.current_player]["obj"].now.set()
 
                     if DEBUG:
                         print(f"Player {self.current_player} turn")
-
+                    time.sleep(0.1)
                     players[self.current_player]["obj"].now.clear()
             except KeyError:
                 players = self.players.copy()
@@ -227,10 +228,14 @@ class Table(threading.Thread):
             if self.liar_event.is_set():
                 self.liar_event.clear()
                 self.liar_handler()
+                active_player = 20
+                if DEBUG:
+                    print("Finished liar handler")
+                time.sleep(3)
+                continue
 
-            last_player = self.current_player
+            active_player = self.current_player
 
-            players = self.players.copy()
 
     def liar_handler(self):
         """
@@ -404,6 +409,8 @@ class Player(threading.Thread):
         self.sub_thread.name = f"ShuffleHandler-{self.uid}"
 
         while True:
+            if DEBUG:
+                print(f"Player {self.uid} waiting for their turn")
             self.now.wait()
 
             if DEBUG:
