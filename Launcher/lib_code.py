@@ -13,6 +13,3 @@ class LauncherLib:
             return version
         except:
             return "Error fetching version"
-
-l = LauncherLib()
-print(l.get_version())  # This will print the latest version from the GitHub releases page

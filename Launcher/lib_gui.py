@@ -122,7 +122,3 @@ class GUI(ctk.CTk):
             self.bg_image.configure(size=(event.width, event.height))
 
 
-if __name__ == "__main__":
-    gui = GUI()
-    gui.build()
-    gui.mainloop()
