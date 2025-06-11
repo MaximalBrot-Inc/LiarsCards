@@ -56,6 +56,7 @@ class Main(ur.Entity):
         self.cards_dropped_amount = 0
         self.cards_dropped = 0
         self.current_state = "lobby"
+        self.fault = False
         
     def window(self):
         '''
@@ -160,7 +161,7 @@ class Main(ur.Entity):
                         position=(0, 300, -300), 
                         rotation=(-90, -180, 0),
                         visible=False,
-                        #shader=lit_with_shadows_shader
+                        shader=unlit_shader
         )
         
         
@@ -347,10 +348,13 @@ class Main(ur.Entity):
                 self.ui.text.text = f"{self.ui.count}/{self.ui.max_player}"
     
     def game_start(self, dic):
-        try:
-            self.recv
-        except:
+        
+        if not self.fault:
             self.network.send("Start")
+            '''
+            Send the start signal to the network just the first time
+            '''
+        self.fault = True
         cards = self.network.recv_cards()
         cards.reverse()
         self.current_state = "game"
@@ -373,6 +377,7 @@ class Main(ur.Entity):
         while  True:
             print("WAITING TO RECEIVE")
             last_player = self.network.recv()
+            self.fault = True
             if last_player.startswith("liar"):
                 liar, uid = last_player.split(",")
                 self.liar(uid)          
@@ -521,15 +526,19 @@ class Main(ur.Entity):
         if self.tablecard.rotation_y >= self.rot_to_achieve:
             self.tablecard.rotation_y = self.rot_to_achieve
             ur.destroy(self.mover)
-            ur.destroy(self.tablecard)
             self.mover = None
             if self.state:
                 self.player.select_cards(0)
+            self.tablecard.parent = ur.camera.ui
+            self.tablecard.position = (0, 0)
+            # Make the card look at the camera/player
+            self.tablecard.look_at(ur.camera)
+            # Optionally, adjust rotation_x if needed for correct facing
+            self.tablecard.rotation_x = -90
             return
 
-    
     '''
-    send indexes of cards picked by player 
+    send indexes of cards picked by player
     server sends amount of cards picked by player to everyone. Place cards in the middle of the table and delete them from opponents hands
         player gets 'now' when its his turn
     player gets prompt to call liar or place new cards

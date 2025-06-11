@@ -28,6 +28,7 @@ class Player(FirstPersonController):
         self.picked_cards = []
         self.card_selected = 0
         self.gravity = 0
+        self.speed = 20
     
     def disable_movement(self):
         self.speed = 0
