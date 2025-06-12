@@ -59,6 +59,7 @@ class Player(FirstPersonController):
             font="VeraMono.ttf",
         )
         ur.invoke(self.dead, delay=4)
+        
     
     def spawn_cards(self, cards):
         center_pos = (0, 0.9, 0)

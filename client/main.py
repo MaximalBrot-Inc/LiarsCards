@@ -443,6 +443,11 @@ class Main(ur.Entity):
         if bullet == "live":
             self.opponents[int(uid)].gun.shoot()
             self.opponents.remove(self.opponents[int(uid)])
+            if len(self.opponents) == 1:
+                print("Game over, you win!")
+                self.network.disconnect()
+                return
+                
         self.opponents[int(uid)].gun.reset()
         self.delete_cards(all=True)
         print("cards deleted")
@@ -465,6 +470,7 @@ class Main(ur.Entity):
                     except AttributeError:
                         pass
                     ur.destroy(j[0])
+                i.cards.clear()
 
         for i in self.table.children:
             try:
@@ -472,6 +478,8 @@ class Main(ur.Entity):
             except AttributeError:
                 pass
             ur.destroy(i)
+            
+        
 
 
     def throw_cards(self):
@@ -530,11 +538,7 @@ class Main(ur.Entity):
             if self.state:
                 self.player.select_cards(0)
             self.tablecard.parent = ur.camera.ui
-            self.tablecard.position = (0, 0)
-            # Make the card look at the camera/player
-            self.tablecard.look_at(ur.camera)
-            # Optionally, adjust rotation_x if needed for correct facing
-            self.tablecard.rotation_x = -90
+            
             return
 
     '''
