@@ -105,3 +105,38 @@ a:link {
 	border: 3px solid #24292e;
 	margin-bottom: 20px;
 }
+
+@media (max-width: 768px) {
+  .hero-header {
+    height: 180px;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .hero-main {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+
+  .profile-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .user-box {
+    width: 90%; /* flexibler als feste 525px */
+    padding: 1rem;
+  }
+
+  .user-box p {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .github-avatar {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
+  }
+}

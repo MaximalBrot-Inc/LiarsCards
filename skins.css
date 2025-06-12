@@ -119,3 +119,30 @@ body {
 	justify-content: right;
 	text-decoration: none;
 }
+
+@media (max-width: 768px) {
+  .hero-header {
+    height: 180px;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  .screenshot-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .default,
+  .skin1,
+  .skin2,
+  .skin3 {
+    width: 90%;
+    padding: 1rem;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+}
