@@ -443,10 +443,13 @@ class Main(ur.Entity):
         if bullet == "live":
             self.opponents[int(uid)].gun.shoot()
             self.opponents.remove(self.opponents[int(uid)])
-            if len(self.opponents) == 1:
-                print("Game over, you win!")
-                self.network.disconnect()
-                return
+        if len(self.opponents) == 1:
+            if self.opponents[0] == self.player:
+                print("You won!")
+            else:
+                print("You lost!")
+            self.network.disconnect()
+            return
                 
         self.opponents[int(uid)].gun.reset()
         self.delete_cards(all=True)
