@@ -29,7 +29,7 @@ class GUI(ctk.CTk):
             self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
             self.bg_label.lower()
         except Exception as e:
-            print(f"Error loading background image: {str(e)}")
+            print(f"Error loading background image")
 
     def main_plot(self):
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -47,25 +47,26 @@ class GUI(ctk.CTk):
 
         self.version_label = ctk.CTkLabel(
             self,
-            text=f"Version: {self.launcher.get_version()}",
+            text=f"Latest Version: {self.launcher.get_version()}",
+            font=("Arial", 20),
         )
         self.version_label.grid(row=0, column=2, padx=20, pady=20, sticky="e")
 
         self.status_label = ctk.CTkLabel(
             self,
             text="Ready",
+            font=("Arial", 20),
         )
         self.status_label.grid(row=3, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
 
     def button_init(self):
-        # Direkt auf dem Hauptfenster platzierte Buttons
         self.button_start = ctk.CTkButton(
             self, 
             text="Start Game", 
             command=self.start_game,
             corner_radius=0,
-            width=200,    # Breite in Pixel
-            height=60     # Höhe in Pixel
+            width=200,    
+            height=60    
         )
         self.button_start.grid(row=2, column=1, padx=20, pady=20)
 
@@ -95,21 +96,14 @@ class GUI(ctk.CTk):
 
 
     def start_game(self):
-        self.status_label.configure(text="Starting the game...")
-
-        def launch_task():
-            try:
-                base_dir = os.path.dirname(os.path.abspath(__file__))
-                client_main = os.path.join(base_dir, "..", "client", "main.py")
-                client_main = os.path.abspath(client_main)
-                subprocess.Popen([sys.executable, client_main])
-                self.status_label.configure(text="Game launched successfully!")
-                time.sleep(3)
-                self.quit()
-            except Exception as e:
-                self.status_label.configure(text=f"Error launching game: {str(e)}")
-
-        threading.Thread(target=launch_task).start()
+        try:
+            self.status_label.configure(text="Starting the game...")
+            threading.Thread(target=self.launcher.launch_game).start()
+            self.status_label.configure(text="Game launched successfully!")
+            time.sleep(3)
+            self.quit()
+        except:
+            self.status_label.configure(text="Error launching game. Please try again.")
 
     def build(self):
         self.set_background()

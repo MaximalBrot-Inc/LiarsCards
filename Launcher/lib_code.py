@@ -1,4 +1,9 @@
 import requests
+import subprocess
+import threading
+import time
+import os
+import sys
 
 class LauncherLib:
     def __init__(self):
@@ -13,3 +18,10 @@ class LauncherLib:
             return version
         except:
             return "Error fetching version"
+
+    def launch_game(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        client_main = os.path.join(base_dir, "..", "client", "main.py")
+        client_main = os.path.abspath(client_main)
+        subprocess.Popen([sys.executable, client_main])
+  
