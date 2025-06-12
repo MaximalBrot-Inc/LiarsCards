@@ -31,7 +31,7 @@ class Lobby:
         self.name = ur.InputField(parent=bg_name, model=ur.Quad(aspect=5, radius=.1), default_value='', limit_content_to="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ", active=True, character_limit=20, scale=(0.98, 0.85), color="#333333")
 
         bg_ip = ur.Entity(model=ur.Quad(aspect=5, radius=.1), parent=ur.camera.ui, color="#5e5e5e", scale=(.5, 0.05), position=(0.5, 0.09))
-        self.server_ip = ur.InputField(parent=bg_ip, model=ur.Quad(aspect=5, radius=.1), default_value='', limit_content_to="0123456789.", character_limit=13, scale=(0.98, 0.85), color="#333333")
+        self.server_ip = ur.InputField(parent=bg_ip, model=ur.Quad(aspect=5, radius=.1), default_value='', limit_content_to="0123456789.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", scale=(0.98, 0.85), color="#333333")
 
         bg_port = ur.Entity(model=ur.Quad(aspect=5, radius=.1), parent=ur.camera.ui, color="#5e5e5e", scale=(.5, 0.05), position=(0.5, 0.015))
         self.server_port = ur.InputField(parent=bg_port, model=ur.Quad(aspect=5, radius=.1), default_value='', limit_content_to="0123456789", character_limit=5, scale=(0.98, 0.85), color="#333333", position=(0, 0, -0.1))
